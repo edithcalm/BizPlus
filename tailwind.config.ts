@@ -58,6 +58,7 @@ export default {
         income: "hsl(var(--income))",
         expense: "hsl(var(--expense))",
         mpesa: "hsl(var(--mpesa))",
+        pochi: "hsl(var(--pochi))",
         cash: "hsl(var(--cash))",
         chat: {
           sent: "hsl(var(--chat-sent))",

@@ -6,9 +6,11 @@ import {
   disconnectMpesaAccount,
   fetchMpesaTransactions,
   simulateIncomingTransaction,
-  mpesaToTransaction
+  mpesaToTransaction,
+  getDemoTransactions,
+  DEMO_PHONE_NUMBER
 } from '@/lib/mpesaApi';
-import { Transaction } from '@/types/bizplus';
+import { Transaction, DailySummary } from '@/types/bizplus';
 import { toast } from '@/hooks/use-toast';
 
 const STORAGE_KEY = 'bizplus_mpesa_credentials';
@@ -57,24 +59,36 @@ export function useMpesaConnection() {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
   }, [transactions]);
 
-  // Connect to M-Pesa
+  // Connect to M-Pesa with optional Pochi la Biashara
   const connect = useCallback(async (
     tillOrPaybill: string,
     type: 'till' | 'paybill',
-    businessName: string
+    businessName: string,
+    pochiPhoneNumber?: string
   ) => {
     setIsConnecting(true);
     try {
-      const creds = await connectMpesaAccount(tillOrPaybill, type, businessName);
+      const creds = await connectMpesaAccount(tillOrPaybill, type, businessName, pochiPhoneNumber);
       setCredentials(creds);
       
+      const pochiMessage = pochiPhoneNumber ? ` + Pochi la Biashara (${pochiPhoneNumber})` : '';
       toast({
         title: "M-Pesa Connected! 🎉",
-        description: `Successfully linked ${type === 'till' ? 'Till' : 'Paybill'} ${tillOrPaybill}`,
+        description: `Successfully linked ${type === 'till' ? 'Till' : 'Paybill'} ${tillOrPaybill}${pochiMessage}`,
       });
 
-      // Fetch initial transactions
-      await fetchTransactions(creds);
+      // Load demo transactions if using the demo phone number
+      if (pochiPhoneNumber === DEMO_PHONE_NUMBER) {
+        const demoTxns = getDemoTransactions().map(mpesaToTransaction);
+        setTransactions(demoTxns);
+        toast({
+          title: "Demo Mode Active 📱",
+          description: "Loaded sample transactions for demonstration",
+        });
+      } else {
+        // Fetch initial transactions
+        await fetchTransactionsInternal(creds);
+      }
       
       return creds;
     } catch (error) {
@@ -114,21 +128,17 @@ export function useMpesaConnection() {
     }
   }, []);
 
-  // Fetch transactions from M-Pesa API
-  const fetchTransactions = useCallback(async (creds?: MpesaCredentials) => {
-    const activeCredentials = creds || credentials;
-    if (!activeCredentials?.isConnected) return;
-
+  // Internal fetch function
+  const fetchTransactionsInternal = async (creds: MpesaCredentials) => {
     setIsFetching(true);
     try {
-      const mpesaTransactions = await fetchMpesaTransactions(activeCredentials, 5);
+      const mpesaTransactions = await fetchMpesaTransactions(creds, 5);
       const newTransactions = mpesaTransactions.map(mpesaToTransaction);
       
-      // Merge with existing, avoiding duplicates
       setTransactions(prev => {
         const existingIds = new Set(prev.map(t => t.id));
         const unique = newTransactions.filter(t => !existingIds.has(t.id));
-        return [...unique, ...prev].slice(0, 50); // Keep last 50 transactions
+        return [...unique, ...prev].slice(0, 50);
       });
       
       setLastFetch(new Date());
@@ -137,6 +147,13 @@ export function useMpesaConnection() {
     } finally {
       setIsFetching(false);
     }
+  };
+
+  // Fetch transactions from M-Pesa API
+  const fetchTransactions = useCallback(async (creds?: MpesaCredentials) => {
+    const activeCredentials = creds || credentials;
+    if (!activeCredentials?.isConnected) return;
+    await fetchTransactionsInternal(activeCredentials);
   }, [credentials]);
 
   // Simulate real-time incoming transactions
@@ -148,10 +165,12 @@ export function useMpesaConnection() {
       const transaction = mpesaToTransaction(newTxn);
       setTransactions(prev => [transaction, ...prev].slice(0, 50));
       
-      // Show notification for new transaction
+      const sourceLabel = newTxn.source === 'pochi' ? ' (Pochi)' : '';
+      const isIncome = newTxn.transactionType.includes('RECEIVED') || newTxn.transactionType === 'BUYGOODS';
+      
       toast({
-        title: newTxn.transactionType === 'RECEIVED' ? "💰 Payment Received!" : "💸 Payment Sent",
-        description: `KES ${newTxn.amount.toLocaleString()} ${newTxn.transactionType === 'RECEIVED' ? 'from' : 'to'} ${newTxn.partyName}`,
+        title: isIncome ? "💰 Payment Received!" : "💸 Payment Sent",
+        description: `KES ${newTxn.amount.toLocaleString()} ${isIncome ? 'from' : 'to'} ${newTxn.partyName}${sourceLabel}`,
       });
     }
   }, [credentials]);
@@ -159,7 +178,6 @@ export function useMpesaConnection() {
   // Start/stop polling for new transactions
   useEffect(() => {
     if (credentials?.isConnected) {
-      // Poll every 30 seconds for demo purposes
       pollingRef.current = setInterval(checkForNewTransactions, 30000);
       
       return () => {
@@ -180,8 +198,8 @@ export function useMpesaConnection() {
     return newTransaction;
   }, []);
 
-  // Calculate daily summary
-  const getDailySummary = useCallback(() => {
+  // Calculate daily summary with Pochi breakdown
+  const getDailySummary = useCallback((): DailySummary => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -207,6 +225,10 @@ export function useMpesaConnection() {
       .filter(t => t.type === 'income' && t.method === 'cash')
       .reduce((sum, t) => sum + t.amount, 0);
 
+    const pochiSales = todayTransactions
+      .filter(t => t.type === 'income' && t.method === 'pochi')
+      .reduce((sum, t) => sum + t.amount, 0);
+
     const cashExpenses = todayTransactions
       .filter(t => t.type === 'expense' && t.method === 'cash')
       .reduce((sum, t) => sum + t.amount, 0);
@@ -218,6 +240,7 @@ export function useMpesaConnection() {
       netProfit: totalSales - totalExpenses,
       mpesaSales,
       cashSales,
+      pochiSales,
       expectedCash: cashSales - cashExpenses,
       transactionCount: todayTransactions.length,
     };

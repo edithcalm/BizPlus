@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { X, Smartphone, Shield, Check, Loader2 } from 'lucide-react';
+import { X, Smartphone, Shield, Check, Loader2, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { DEMO_PHONE_NUMBER } from '@/lib/mpesaApi';
 
 interface MpesaConnectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnect: (tillOrPaybill: string, type: 'till' | 'paybill', businessName: string) => Promise<void>;
+  onConnect: (tillOrPaybill: string, type: 'till' | 'paybill', businessName: string, pochiPhone?: string) => Promise<void>;
   isConnecting: boolean;
 }
 
@@ -16,10 +17,12 @@ export function MpesaConnectionModal({
   onConnect,
   isConnecting 
 }: MpesaConnectionModalProps) {
-  const [step, setStep] = useState<'type' | 'details' | 'success'>('type');
+  const [step, setStep] = useState<'type' | 'details' | 'pochi' | 'success'>('type');
   const [connectionType, setConnectionType] = useState<'till' | 'paybill'>('till');
   const [number, setNumber] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [pochiEnabled, setPochiEnabled] = useState(false);
+  const [pochiPhone, setPochiPhone] = useState(DEMO_PHONE_NUMBER);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -38,7 +41,12 @@ export function MpesaConnectionModal({
     }
 
     try {
-      await onConnect(number.trim(), connectionType, businessName.trim());
+      await onConnect(
+        number.trim(), 
+        connectionType, 
+        businessName.trim(),
+        pochiEnabled ? pochiPhone.trim() : undefined
+      );
       setStep('success');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Connection failed');
@@ -49,6 +57,8 @@ export function MpesaConnectionModal({
     setStep('type');
     setNumber('');
     setBusinessName('');
+    setPochiEnabled(false);
+    setPochiPhone(DEMO_PHONE_NUMBER);
     setError('');
     onClose();
   };
@@ -62,7 +72,7 @@ export function MpesaConnectionModal({
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 pb-8 animate-slide-up shadow-elevated max-h-[85vh] overflow-y-auto mb-16 sm:mb-0">
         {/* Close button */}
         <button 
           onClick={handleClose}
@@ -149,7 +159,7 @@ export function MpesaConnectionModal({
             </div>
 
             {/* Form */}
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   {connectionType === 'till' ? 'Till Number' : 'Paybill Number'}
@@ -185,11 +195,76 @@ export function MpesaConnectionModal({
                   )}
                 />
               </div>
+            </div>
 
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
+            {/* Pochi la Biashara Toggle */}
+            <div className="mb-6">
+              <button
+                onClick={() => setPochiEnabled(!pochiEnabled)}
+                className={cn(
+                  'w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
+                  pochiEnabled 
+                    ? 'border-pochi bg-pochi/5' 
+                    : 'border-border hover:border-pochi/50'
+                )}
+              >
+                <div className={cn(
+                  'h-10 w-10 rounded-full flex items-center justify-center shrink-0',
+                  pochiEnabled ? 'bg-pochi/10' : 'bg-muted'
+                )}>
+                  <Wallet className={cn(
+                    'h-5 w-5',
+                    pochiEnabled ? 'text-pochi' : 'text-muted-foreground'
+                  )} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className={cn(
+                    'font-semibold',
+                    pochiEnabled ? 'text-pochi' : 'text-foreground'
+                  )}>
+                    Pochi la Biashara
+                  </h3>
+                  <p className="text-xs text-muted-foreground">Add your business wallet</p>
+                </div>
+                <div className={cn(
+                  'h-6 w-6 rounded-full border-2 flex items-center justify-center',
+                  pochiEnabled 
+                    ? 'border-pochi bg-pochi' 
+                    : 'border-muted-foreground'
+                )}>
+                  {pochiEnabled && <Check className="h-3 w-3 text-white" />}
+                </div>
+              </button>
+
+              {/* Pochi Phone Number */}
+              {pochiEnabled && (
+                <div className="mt-3 animate-fade-in">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Pochi Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={pochiPhone}
+                    onChange={(e) => setPochiPhone(e.target.value.replace(/[^\d]/g, ''))}
+                    placeholder="e.g. 0721606409"
+                    className={cn(
+                      'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
+                      'focus:outline-none focus:ring-0 focus:border-pochi transition-colors',
+                      'placeholder:text-muted-foreground'
+                    )}
+                    maxLength={10}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Demo: Use {DEMO_PHONE_NUMBER} for sample transactions
+                  </p>
+                </div>
               )}
             </div>
+
+            {error && (
+              <p className="text-sm text-destructive mb-4">{error}</p>
+            )}
 
             {/* Submit Button */}
             <Button 
@@ -216,9 +291,14 @@ export function MpesaConnectionModal({
               <Check className="h-8 w-8 text-income" />
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">Connected! 🎉</h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-2">
               Your M-Pesa transactions will now sync automatically
             </p>
+            {pochiEnabled && (
+              <p className="text-sm text-pochi mb-4">
+                ✓ Pochi la Biashara enabled
+              </p>
+            )}
             <Button onClick={handleClose} className="w-full" size="lg">
               Start Tracking
             </Button>

@@ -1,4 +1,4 @@
-import { Smartphone, Wifi, WifiOff, RefreshCw, Settings } from 'lucide-react';
+import { Smartphone, Wifi, WifiOff, RefreshCw, Settings, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/formatters';
 
@@ -7,6 +7,8 @@ interface MpesaStatusProps {
   businessName?: string;
   tillNumber?: string;
   paybillNumber?: string;
+  pochiPhoneNumber?: string;
+  hasPochi?: boolean;
   lastFetch: Date | null;
   isFetching: boolean;
   onConnect: () => void;
@@ -19,6 +21,8 @@ export function MpesaStatus({
   businessName,
   tillNumber,
   paybillNumber,
+  pochiPhoneNumber,
+  hasPochi,
   lastFetch,
   isFetching,
   onConnect,
@@ -37,7 +41,7 @@ export function MpesaStatus({
         <div className="flex-1 text-left min-w-0">
           <h3 className="font-semibold text-foreground text-sm sm:text-base">Connect M-Pesa</h3>
           <p className="text-xs sm:text-sm text-muted-foreground truncate">
-            Link your Till or Paybill for auto-tracking
+            Link Till, Paybill & Pochi la Biashara
           </p>
         </div>
         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
@@ -54,14 +58,21 @@ export function MpesaStatus({
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">{businessName}</h3>
           <span className="px-2 py-0.5 bg-income/10 text-income text-[10px] sm:text-xs font-medium rounded-full shrink-0">
             Connected
           </span>
+          {hasPochi && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-pochi/10 text-pochi text-[10px] sm:text-xs font-medium rounded-full shrink-0">
+              <Wallet className="h-2.5 w-2.5" />
+              Pochi
+            </span>
+          )}
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground">
           {tillNumber ? `Till: ${tillNumber}` : `Paybill: ${paybillNumber}`}
+          {pochiPhoneNumber && ` • Pochi: ${pochiPhoneNumber}`}
           {lastFetch && (
             <span className="ml-2">• Synced {formatRelativeTime(lastFetch)}</span>
           )}

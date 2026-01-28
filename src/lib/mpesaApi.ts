@@ -1,20 +1,26 @@
-// Simulated M-Pesa Daraja API Service
+// Simulated M-Pesa Daraja API Service with Pochi la Biashara Support
 // In production, this would connect to Safaricom's sandbox/live API
 
-import { Transaction } from '@/types/bizplus';
+import { Transaction, TransactionSource, PaymentMethod } from '@/types/bizplus';
+
+// Demo phone number for Pochi la Biashara
+export const DEMO_PHONE_NUMBER = '0721606409';
 
 export interface MpesaCredentials {
   tillNumber?: string;
   paybillNumber?: string;
+  pochiPhoneNumber?: string;
   businessName: string;
   isConnected: boolean;
   connectedAt?: Date;
+  hasPochi: boolean;
 }
 
 export interface MpesaTransaction {
   transactionId: string;
   transactionCode: string;
-  transactionType: 'RECEIVED' | 'SENT' | 'PAYBILL' | 'BUYGOODS';
+  transactionType: 'RECEIVED' | 'SENT' | 'PAYBILL' | 'BUYGOODS' | 'POCHI_RECEIVED' | 'POCHI_SENT';
+  source: TransactionSource;
   amount: number;
   phoneNumber: string;
   partyName: string;
@@ -38,6 +44,12 @@ const businessDescriptions = [
   'Stock purchase', 'Equipment rental'
 ];
 
+// Supplier names for expenses
+const supplierNames = [
+  'KPLC PREPAID', 'NAIROBI WATER', 'Safaricom', 'Kenya Power', 
+  'Wholesale Supplier', 'Hardware Store', 'Transport Services', 'Fuel Station'
+];
+
 // Generate realistic M-Pesa transaction code (format: QJK2L5M8N9)
 const generateTransactionCode = (): string => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -50,6 +62,120 @@ const generatePhoneNumber = (): string => {
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const suffix = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   return prefix + suffix;
+};
+
+// Preloaded dummy transactions for demo (linked to 0721606409)
+export const getDemoTransactions = (): MpesaTransaction[] => {
+  const now = new Date();
+  
+  return [
+    // Pochi la Biashara transactions
+    {
+      transactionId: 'POCHI001',
+      transactionCode: 'RJK2L5M8N9',
+      transactionType: 'POCHI_RECEIVED',
+      source: 'pochi',
+      amount: 2500,
+      phoneNumber: '0712345678',
+      partyName: 'John Mwangi',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 30), // 30 mins ago
+      balance: 18500,
+    },
+    {
+      transactionId: 'POCHI002',
+      transactionCode: 'SJK3M6N9P0',
+      transactionType: 'POCHI_SENT',
+      source: 'pochi',
+      amount: 800,
+      phoneNumber: '0723456789',
+      partyName: 'Wholesale Supplier',
+      accountReference: 'Stock purchase',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 2), // 2 hours ago
+      balance: 16000,
+    },
+    {
+      transactionId: 'POCHI003',
+      transactionCode: 'TJK4N7P0Q1',
+      transactionType: 'POCHI_RECEIVED',
+      source: 'pochi',
+      amount: 1500,
+      phoneNumber: '0734567890',
+      partyName: 'Mary Wanjiku',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 4), // 4 hours ago
+      balance: 16800,
+    },
+    // M-Pesa (Till) transactions
+    {
+      transactionId: 'TILL001',
+      transactionCode: 'QJK2L5M8N9',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 1200,
+      phoneNumber: '0745678901',
+      partyName: 'Peter Kamau',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60), // 1 hour ago
+      balance: 15300,
+    },
+    {
+      transactionId: 'TILL002',
+      transactionCode: 'UJK5P8Q1R2',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 3500,
+      phoneNumber: '0756789012',
+      partyName: 'Jane Njeri',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 3), // 3 hours ago
+      balance: 14100,
+    },
+    // M-Pesa (Paybill) expenses
+    {
+      transactionId: 'PAYBILL001',
+      transactionCode: 'VJK6Q9R2S3',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 500,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'KPLC PREPAID',
+      accountReference: 'Electricity token',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 45), // 45 mins ago
+      balance: 10600,
+    },
+    {
+      transactionId: 'PAYBILL002',
+      transactionCode: 'WJK7R0S3T4',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 300,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'NAIROBI WATER',
+      accountReference: 'Water bill',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 5), // 5 hours ago
+      balance: 10100,
+    },
+    // Yesterday's transactions
+    {
+      transactionId: 'POCHI004',
+      transactionCode: 'XJK8S1T4U5',
+      transactionType: 'POCHI_RECEIVED',
+      source: 'pochi',
+      amount: 4500,
+      phoneNumber: '0767890123',
+      partyName: 'David Ochieng',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 24), // Yesterday
+      balance: 10400,
+    },
+    {
+      transactionId: 'TILL003',
+      transactionCode: 'YJK9T2U5V6',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 2200,
+      phoneNumber: '0778901234',
+      partyName: 'Grace Akinyi',
+      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 26), // Yesterday
+      balance: 5900,
+    },
+  ];
 };
 
 // Simulate fetching transactions from M-Pesa API
@@ -68,8 +194,30 @@ export const fetchMpesaTransactions = async (
   let balance = 15000 + Math.random() * 20000;
 
   for (let i = 0; i < count; i++) {
-    const isReceived = Math.random() > 0.25; // 75% are incoming payments
-    const amount = Math.round((500 + Math.random() * 4500) / 100) * 100; // Round to nearest 100
+    // Determine transaction source randomly
+    const sourceRandom = Math.random();
+    let source: TransactionSource;
+    let transactionType: MpesaTransaction['transactionType'];
+    let isReceived: boolean;
+
+    if (credentials.hasPochi && sourceRandom < 0.4) {
+      // 40% Pochi la Biashara if enabled
+      source = 'pochi';
+      isReceived = Math.random() > 0.25;
+      transactionType = isReceived ? 'POCHI_RECEIVED' : 'POCHI_SENT';
+    } else if (sourceRandom < 0.7) {
+      // 30% Till/Buy Goods
+      source = 'till';
+      isReceived = true; // Till transactions are always income
+      transactionType = 'BUYGOODS';
+    } else {
+      // 30% Paybill (usually expenses)
+      source = 'paybill';
+      isReceived = Math.random() > 0.7; // 30% receive, 70% send
+      transactionType = isReceived ? 'RECEIVED' : 'PAYBILL';
+    }
+
+    const amount = Math.round((500 + Math.random() * 4500) / 100) * 100;
     
     if (isReceived) {
       balance += amount;
@@ -80,11 +228,14 @@ export const fetchMpesaTransactions = async (
     transactions.push({
       transactionId: `TXN${Date.now()}${i}`,
       transactionCode: generateTransactionCode(),
-      transactionType: isReceived ? 'RECEIVED' : 'SENT',
+      transactionType,
+      source,
       amount,
       phoneNumber: generatePhoneNumber(),
-      partyName: kenyanNames[Math.floor(Math.random() * kenyanNames.length)],
-      accountReference: isReceived ? undefined : businessDescriptions[Math.floor(Math.random() * businessDescriptions.length)],
+      partyName: isReceived 
+        ? kenyanNames[Math.floor(Math.random() * kenyanNames.length)]
+        : supplierNames[Math.floor(Math.random() * supplierNames.length)],
+      accountReference: !isReceived ? businessDescriptions[Math.floor(Math.random() * businessDescriptions.length)] : undefined,
       transactionDate: new Date(Date.now() - i * (Math.random() * 3600000)),
       balance: Math.round(balance),
     });
@@ -95,13 +246,22 @@ export const fetchMpesaTransactions = async (
 
 // Convert M-Pesa transaction to app Transaction format
 export const mpesaToTransaction = (mpesa: MpesaTransaction): Transaction => {
-  const isIncome = mpesa.transactionType === 'RECEIVED' || mpesa.transactionType === 'BUYGOODS';
+  const isIncome = mpesa.transactionType === 'RECEIVED' || 
+                   mpesa.transactionType === 'BUYGOODS' || 
+                   mpesa.transactionType === 'POCHI_RECEIVED';
+  
+  // Determine payment method
+  let method: PaymentMethod = 'mpesa';
+  if (mpesa.source === 'pochi') {
+    method = 'pochi';
+  }
   
   return {
     id: mpesa.transactionId,
     type: isIncome ? 'income' : 'expense',
     amount: mpesa.amount,
-    method: 'mpesa',
+    method,
+    source: mpesa.source,
     description: isIncome 
       ? `Payment from ${mpesa.partyName}` 
       : `Paid to ${mpesa.partyName}${mpesa.accountReference ? ` - ${mpesa.accountReference}` : ''}`,
@@ -118,16 +278,38 @@ export const simulateIncomingTransaction = (credentials: MpesaCredentials): Mpes
   // 30% chance of generating a transaction
   if (Math.random() > 0.3) return null;
 
-  const isReceived = Math.random() > 0.2; // 80% are incoming
+  // Determine source
+  const sourceRandom = Math.random();
+  let source: TransactionSource;
+  let transactionType: MpesaTransaction['transactionType'];
+  let isReceived: boolean;
+
+  if (credentials.hasPochi && sourceRandom < 0.4) {
+    source = 'pochi';
+    isReceived = Math.random() > 0.2;
+    transactionType = isReceived ? 'POCHI_RECEIVED' : 'POCHI_SENT';
+  } else if (sourceRandom < 0.7) {
+    source = 'till';
+    isReceived = true;
+    transactionType = 'BUYGOODS';
+  } else {
+    source = 'paybill';
+    isReceived = Math.random() > 0.6;
+    transactionType = isReceived ? 'RECEIVED' : 'PAYBILL';
+  }
+
   const amount = Math.round((200 + Math.random() * 3000) / 100) * 100;
 
   return {
     transactionId: `TXN${Date.now()}`,
     transactionCode: generateTransactionCode(),
-    transactionType: isReceived ? 'RECEIVED' : 'SENT',
+    transactionType,
+    source,
     amount,
     phoneNumber: generatePhoneNumber(),
-    partyName: kenyanNames[Math.floor(Math.random() * kenyanNames.length)],
+    partyName: isReceived 
+      ? kenyanNames[Math.floor(Math.random() * kenyanNames.length)]
+      : supplierNames[Math.floor(Math.random() * supplierNames.length)],
     transactionDate: new Date(),
     balance: Math.round(10000 + Math.random() * 30000),
   };
@@ -142,11 +324,16 @@ export const validatePaybillNumber = (paybill: string): boolean => {
   return /^\d{5,6}$/.test(paybill);
 };
 
+export const validatePhoneNumber = (phone: string): boolean => {
+  return /^0[17]\d{8}$/.test(phone);
+};
+
 // Simulate connecting to M-Pesa (OAuth flow simulation)
 export const connectMpesaAccount = async (
   tillOrPaybill: string,
   type: 'till' | 'paybill',
-  businessName: string
+  businessName: string,
+  pochiPhoneNumber?: string
 ): Promise<MpesaCredentials> => {
   // Simulate API connection delay
   await new Promise(resolve => setTimeout(resolve, 1500));
@@ -158,13 +345,18 @@ export const connectMpesaAccount = async (
   if (type === 'paybill' && !validatePaybillNumber(tillOrPaybill)) {
     throw new Error('Invalid Paybill Number format. Should be 5-6 digits.');
   }
+  if (pochiPhoneNumber && !validatePhoneNumber(pochiPhoneNumber)) {
+    throw new Error('Invalid phone number format. Should be 07XXXXXXXX or 01XXXXXXXX.');
+  }
 
   return {
     tillNumber: type === 'till' ? tillOrPaybill : undefined,
     paybillNumber: type === 'paybill' ? tillOrPaybill : undefined,
+    pochiPhoneNumber: pochiPhoneNumber || undefined,
     businessName,
     isConnected: true,
     connectedAt: new Date(),
+    hasPochi: !!pochiPhoneNumber,
   };
 };
 
@@ -186,9 +378,22 @@ export const formatMpesaMessage = (txn: MpesaTransaction): string => {
     hour12: true 
   });
 
-  if (txn.transactionType === 'RECEIVED') {
-    return `${txn.transactionCode} Confirmed. You have received Ksh${txn.amount.toLocaleString()}.00 from ${txn.partyName.toUpperCase()} ${txn.phoneNumber} on ${date} at ${time}. New M-PESA balance is Ksh${txn.balance.toLocaleString()}.00.`;
+  const sourceLabel = txn.source === 'pochi' ? ' (Pochi la Biashara)' : '';
+
+  if (txn.transactionType === 'RECEIVED' || txn.transactionType === 'BUYGOODS' || txn.transactionType === 'POCHI_RECEIVED') {
+    return `${txn.transactionCode} Confirmed. You have received Ksh${txn.amount.toLocaleString()}.00 from ${txn.partyName.toUpperCase()} ${txn.phoneNumber} on ${date} at ${time}${sourceLabel}. New M-PESA balance is Ksh${txn.balance.toLocaleString()}.00.`;
   } else {
-    return `${txn.transactionCode} Confirmed. Ksh${txn.amount.toLocaleString()}.00 sent to ${txn.partyName.toUpperCase()} on ${date} at ${time}.${txn.accountReference ? ` For ${txn.accountReference}.` : ''} New M-PESA balance is Ksh${txn.balance.toLocaleString()}.00.`;
+    return `${txn.transactionCode} Confirmed. Ksh${txn.amount.toLocaleString()}.00 sent to ${txn.partyName.toUpperCase()} on ${date} at ${time}${sourceLabel}.${txn.accountReference ? ` For ${txn.accountReference}.` : ''} New M-PESA balance is Ksh${txn.balance.toLocaleString()}.00.`;
+  }
+};
+
+// Get source display label
+export const getSourceLabel = (source?: TransactionSource): string => {
+  switch (source) {
+    case 'pochi': return 'Pochi la Biashara';
+    case 'till': return 'Till Number';
+    case 'paybill': return 'Paybill';
+    case 'cash': return 'Cash';
+    default: return 'M-Pesa';
   }
 };
