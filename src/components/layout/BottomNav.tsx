@@ -21,7 +21,7 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-lg safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-around py-2">
           {navItems.map((item) => {
@@ -33,7 +33,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
                 className={cn(
-                  'flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200',
+                  'flex flex-col items-center gap-1 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200',
                   isActive 
                     ? 'text-primary' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -49,7 +49,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                   )} />
                 </div>
                 <span className={cn(
-                  'text-xs font-medium transition-all duration-200',
+                  'text-[10px] sm:text-xs font-medium transition-all duration-200',
                   isActive && 'font-semibold'
                 )}>
                   {item.label}

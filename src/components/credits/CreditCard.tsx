@@ -86,7 +86,7 @@ export function CreditCard({ credit, onRemind, onPayment }: CreditCardProps) {
       </div>
       
       {/* Dates */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground mb-4">
         <div className="flex items-center gap-1">
           <Calendar className="h-3 w-3" />
           <span>Given: {formatRelativeTime(credit.date)}</span>
@@ -104,11 +104,11 @@ export function CreditCard({ credit, onRemind, onPayment }: CreditCardProps) {
       
       {/* Actions */}
       {credit.status !== 'paid' && (
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm"
             onClick={() => onRemind(credit)}
           >
             Send Reminder
@@ -116,7 +116,7 @@ export function CreditCard({ credit, onRemind, onPayment }: CreditCardProps) {
           <Button 
             variant="income" 
             size="sm" 
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm"
             onClick={() => onPayment(credit)}
           >
             Record Payment

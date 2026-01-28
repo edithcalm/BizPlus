@@ -24,39 +24,39 @@ export function RecentTransactions({ transactions, onViewAll }: RecentTransactio
         </button>
       </div>
       
-      <div className="bg-card rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-card rounded-xl sm:rounded-2xl shadow-card overflow-hidden">
         {recentTransactions.map((transaction, index) => (
           <div 
             key={transaction.id}
             className={cn(
-              'flex items-center gap-3 p-4 transition-colors hover:bg-muted/50',
+              'flex items-center gap-2 sm:gap-3 p-3 sm:p-4 transition-colors hover:bg-muted/50',
               index < recentTransactions.length - 1 && 'border-b border-border'
             )}
           >
             {/* Icon */}
             <div className={cn(
-              'h-10 w-10 rounded-full flex items-center justify-center shrink-0',
+              'h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center shrink-0',
               transaction.type === 'income' ? 'bg-income/10' : 'bg-expense/10'
             )}>
               {transaction.type === 'income' ? (
-                <ArrowDownLeft className="h-5 w-5 text-income" />
+                <ArrowDownLeft className="h-4 w-4 sm:h-5 sm:w-5 text-income" />
               ) : (
-                <ArrowUpRight className="h-5 w-5 text-expense" />
+                <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 text-expense" />
               )}
             </div>
             
             {/* Details */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate">
+              <p className="font-medium text-foreground truncate text-sm sm:text-base">
                 {transaction.description}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
                 {transaction.method === 'mpesa' ? (
                   <Smartphone className="h-3 w-3 text-mpesa" />
                 ) : (
                   <Banknote className="h-3 w-3 text-cash" />
                 )}
-                <span className="text-xs text-muted-foreground">
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
                   {transaction.method === 'mpesa' ? 'M-Pesa' : 'Cash'} • {formatRelativeTime(transaction.date)}
                 </span>
               </div>
@@ -65,13 +65,13 @@ export function RecentTransactions({ transactions, onViewAll }: RecentTransactio
             {/* Amount */}
             <div className="text-right shrink-0">
               <p className={cn(
-                'font-semibold tabular-nums',
+                'font-semibold tabular-nums text-sm sm:text-base',
                 transaction.type === 'income' ? 'text-income' : 'text-expense'
               )}>
-                {transaction.type === 'income' ? '+' : '-'}KES {formatCurrency(transaction.amount)}
+                {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
               </p>
               {transaction.mpesaCode && (
-                <p className="text-xs text-muted-foreground font-mono">
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-mono hidden sm:block">
                   {transaction.mpesaCode}
                 </p>
               )}
