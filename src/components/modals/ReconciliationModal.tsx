@@ -41,7 +41,7 @@ export function ReconciliationModal({
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-6 animate-slide-up shadow-elevated">
+      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated">
         {/* Close button */}
         <button 
           onClick={onClose}
@@ -51,43 +51,44 @@ export function ReconciliationModal({
         </button>
         
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
-            <Calculator className="h-6 w-6 text-warning" />
+        <div className="flex items-center gap-3 mb-5 sm:mb-6">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+            <Calculator className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-foreground">End-of-Day Cash Check</h2>
-            <p className="text-sm text-muted-foreground">Count your physical cash</p>
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-foreground">End-of-Day Cash Check</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">Count your physical cash</p>
           </div>
         </div>
         
         {/* Expected Cash */}
-        <div className="bg-secondary/50 rounded-xl p-4 mb-4">
-          <p className="text-sm text-muted-foreground mb-1">Today's expected cash</p>
-          <p className="text-amount text-foreground tabular-nums">
+        <div className="bg-secondary/50 rounded-xl p-3 sm:p-4 mb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Today's expected cash</p>
+          <p className="text-xl sm:text-amount text-foreground tabular-nums">
             KES {formatCurrency(expectedCash)}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
             Cash sales minus cash expenses
           </p>
         </div>
         
         {/* Input */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
             How much cash is physically available?
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">
               KES
             </span>
             <input
               type="number"
+              inputMode="numeric"
               value={actualCash}
               onChange={(e) => setActualCash(e.target.value)}
               placeholder="0"
               className={cn(
-                'w-full pl-14 pr-4 py-4 bg-background border-2 rounded-xl text-amount-sm tabular-nums',
+                'w-full pl-14 pr-4 py-3 sm:py-4 bg-background border-2 rounded-xl text-lg sm:text-amount-sm tabular-nums',
                 'focus:outline-none focus:ring-0 focus:border-primary transition-colors',
                 'placeholder:text-muted-foreground/50'
               )}

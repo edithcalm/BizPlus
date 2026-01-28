@@ -1,0 +1,230 @@
+import { useState } from 'react';
+import { X, Smartphone, Shield, Check, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+interface MpesaConnectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConnect: (tillOrPaybill: string, type: 'till' | 'paybill', businessName: string) => Promise<void>;
+  isConnecting: boolean;
+}
+
+export function MpesaConnectionModal({ 
+  isOpen, 
+  onClose, 
+  onConnect,
+  isConnecting 
+}: MpesaConnectionModalProps) {
+  const [step, setStep] = useState<'type' | 'details' | 'success'>('type');
+  const [connectionType, setConnectionType] = useState<'till' | 'paybill'>('till');
+  const [number, setNumber] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleConnect = async () => {
+    setError('');
+    
+    if (!number.trim()) {
+      setError(`Please enter your ${connectionType === 'till' ? 'Till' : 'Paybill'} number`);
+      return;
+    }
+    
+    if (!businessName.trim()) {
+      setError('Please enter your business name');
+      return;
+    }
+
+    try {
+      await onConnect(number.trim(), connectionType, businessName.trim());
+      setStep('success');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Connection failed');
+    }
+  };
+
+  const handleClose = () => {
+    setStep('type');
+    setNumber('');
+    setBusinessName('');
+    setError('');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in"
+        onClick={handleClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated max-h-[90vh] overflow-y-auto">
+        {/* Close button */}
+        <button 
+          onClick={handleClose}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        
+        {step === 'type' && (
+          <>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-full bg-mpesa/10 flex items-center justify-center">
+                <Smartphone className="h-6 w-6 text-mpesa" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-foreground">Connect M-Pesa</h2>
+                <p className="text-sm text-muted-foreground">Link your business account</p>
+              </div>
+            </div>
+
+            {/* Connection Types */}
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => {
+                  setConnectionType('till');
+                  setStep('details');
+                }}
+                className="w-full flex items-center gap-4 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors text-left"
+              >
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg font-bold text-primary">T</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground">Till Number</h3>
+                  <p className="text-sm text-muted-foreground">For Lipa na M-Pesa (Buy Goods)</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setConnectionType('paybill');
+                  setStep('details');
+                }}
+                className="w-full flex items-center gap-4 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors text-left"
+              >
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg font-bold text-primary">P</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground">Paybill Number</h3>
+                  <p className="text-sm text-muted-foreground">For business payments</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Security Note */}
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-xl">
+              <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Your M-Pesa credentials are encrypted and stored securely. 
+                BizPlus only reads transaction data.
+              </p>
+            </div>
+          </>
+        )}
+
+        {step === 'details' && (
+          <>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <button 
+                onClick={() => setStep('type')}
+                className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+              >
+                ←
+              </button>
+              <div>
+                <h2 className="text-lg font-bold text-foreground">
+                  Enter {connectionType === 'till' ? 'Till' : 'Paybill'} Details
+                </h2>
+                <p className="text-sm text-muted-foreground">We'll verify your account</p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {connectionType === 'till' ? 'Till Number' : 'Paybill Number'}
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value.replace(/\D/g, ''))}
+                  placeholder={connectionType === 'till' ? 'e.g. 123456' : 'e.g. 247247'}
+                  className={cn(
+                    'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
+                    'focus:outline-none focus:ring-0 focus:border-primary transition-colors',
+                    'placeholder:text-muted-foreground'
+                  )}
+                  maxLength={7}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Business Name
+                </label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="e.g. Mama Mboga Stores"
+                  className={cn(
+                    'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
+                    'focus:outline-none focus:ring-0 focus:border-primary transition-colors',
+                    'placeholder:text-muted-foreground'
+                  )}
+                />
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <Button 
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="w-full"
+              size="lg"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Connecting...
+                </>
+              ) : (
+                'Connect M-Pesa Account'
+              )}
+            </Button>
+          </>
+        )}
+
+        {step === 'success' && (
+          <div className="text-center py-6">
+            <div className="h-16 w-16 rounded-full bg-income/10 flex items-center justify-center mx-auto mb-4">
+              <Check className="h-8 w-8 text-income" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-2">Connected! 🎉</h2>
+            <p className="text-muted-foreground mb-6">
+              Your M-Pesa transactions will now sync automatically
+            </p>
+            <Button onClick={handleClose} className="w-full" size="lg">
+              Start Tracking
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
