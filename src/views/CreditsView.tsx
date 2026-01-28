@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Users, AlertTriangle } from 'lucide-react';
+import { Plus, Users, AlertTriangle, Search } from 'lucide-react';
 import { CreditCard } from '@/components/credits/CreditCard';
 import { ReminderModal } from '@/components/modals/ReminderModal';
 import { Button } from '@/components/ui/button';
@@ -13,15 +13,29 @@ export function CreditsView() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'overdue'>('all');
   const [selectedCredit, setSelectedCredit] = useState<CreditEntry | null>(null);
   const [showReminder, setShowReminder] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const now = new Date();
   
   const filteredCredits = credits.filter(credit => {
-    if (filter === 'all') return credit.status !== 'paid';
-    if (filter === 'pending') return credit.status === 'pending';
+    // Filter by status
+    if (filter === 'all' && credit.status === 'paid') return false;
+    if (filter === 'pending' && credit.status !== 'pending') return false;
     if (filter === 'overdue') {
-      return credit.dueDate && now > credit.dueDate && credit.status !== 'paid';
+      const isOverdue = credit.dueDate && now > credit.dueDate && credit.status !== 'paid';
+      if (!isOverdue) return false;
     }
+    
+    // Filter by search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        credit.customerName.toLowerCase().includes(query) ||
+        credit.phoneNumber?.includes(query) ||
+        credit.description.toLowerCase().includes(query)
+      );
+    }
+    
     return true;
   });
 
@@ -47,16 +61,16 @@ export function CreditsView() {
   };
 
   return (
-    <div className="px-4 pb-24">
+    <div className="px-3 sm:px-4 pb-24">
       {/* Header Stats */}
-      <div className="bg-card rounded-2xl p-5 shadow-card mb-6 animate-slide-up">
+      <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card mb-4 sm:mb-6 animate-slide-up">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <Users className="h-5 w-5 text-primary" />
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Total Outstanding</p>
-            <p className="text-amount text-foreground tabular-nums">
+          <div className="min-w-0">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Outstanding</p>
+            <p className="text-xl sm:text-amount text-foreground tabular-nums truncate">
               KES {formatCurrency(totalOutstanding)}
             </p>
           </div>
@@ -64,22 +78,34 @@ export function CreditsView() {
         
         {overdueCount > 0 && (
           <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-xl">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <span className="text-sm font-medium text-destructive">
+            <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-destructive">
               {overdueCount} {overdueCount === 1 ? 'customer' : 'customers'} overdue
             </span>
           </div>
         )}
       </div>
+
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search customers..."
+          className="w-full pl-10 pr-4 py-2.5 bg-card border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+      </div>
       
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
         {(['all', 'pending', 'overdue'] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={cn(
-              'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+              'px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all',
               filter === f
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-card text-muted-foreground hover:bg-muted'
@@ -93,7 +119,7 @@ export function CreditsView() {
       </div>
       
       {/* Credits List */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {filteredCredits.map((credit, index) => (
           <div key={credit.id} className={`stagger-${(index % 4) + 1}`}>
             <CreditCard 
@@ -107,7 +133,9 @@ export function CreditsView() {
         {filteredCredits.length === 0 && (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No credits to show</p>
+            <p className="text-muted-foreground text-sm">
+              {searchQuery ? 'No customers match your search' : 'No credits to show'}
+            </p>
           </div>
         )}
       </div>
@@ -116,7 +144,7 @@ export function CreditsView() {
       <Button
         variant="fab"
         size="fab"
-        className="fixed bottom-20 right-4 z-40"
+        className="fixed bottom-20 right-3 sm:right-4 z-40"
       >
         <Plus className="h-6 w-6" />
       </Button>
