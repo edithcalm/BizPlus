@@ -62,11 +62,11 @@ export function SummaryCard({ summary, onReconcile }: SummaryCardProps) {
       </div>
       
       {/* M-Pesa vs Cash Breakdown */}
-      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl mb-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-muted/50 rounded-xl mb-4">
         <div className="flex-1">
           <div className="flex items-center justify-between text-sm mb-1">
             <span className="text-muted-foreground">M-Pesa</span>
-            <span className="font-medium tabular-nums">KES {formatCurrency(summary.mpesaSales)}</span>
+            <span className="font-medium tabular-nums text-xs sm:text-sm">KES {formatCurrency(summary.mpesaSales)}</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div 
@@ -75,11 +75,12 @@ export function SummaryCard({ summary, onReconcile }: SummaryCardProps) {
             />
           </div>
         </div>
-        <div className="w-px h-8 bg-border" />
+        <div className="hidden sm:block w-px h-8 bg-border" />
+        <div className="block sm:hidden h-px w-full bg-border" />
         <div className="flex-1">
           <div className="flex items-center justify-between text-sm mb-1">
             <span className="text-muted-foreground">Cash</span>
-            <span className="font-medium tabular-nums">KES {formatCurrency(summary.cashSales)}</span>
+            <span className="font-medium tabular-nums text-xs sm:text-sm">KES {formatCurrency(summary.cashSales)}</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div 
