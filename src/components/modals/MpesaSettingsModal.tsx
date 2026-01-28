@@ -1,4 +1,4 @@
-import { X, Smartphone, Wifi, AlertTriangle, Trash2 } from 'lucide-react';
+import { X, Smartphone, Wifi, Trash2, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MpesaCredentials } from '@/lib/mpesaApi';
 import { formatDateTime } from '@/lib/formatters';
@@ -32,7 +32,7 @@ export function MpesaSettingsModal({
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated">
+      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated max-h-[90vh] overflow-y-auto">
         {/* Close button */}
         <button 
           onClick={onClose}
@@ -83,6 +83,29 @@ export function MpesaSettingsModal({
           </div>
         </div>
 
+        {/* Pochi la Biashara Info */}
+        {credentials.hasPochi && credentials.pochiPhoneNumber && (
+          <div className="bg-pochi/5 border border-pochi/20 rounded-xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Wallet className="h-4 w-4 text-pochi" />
+              <span className="text-sm font-medium text-pochi">Pochi la Biashara</span>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phone Number</span>
+                <span className="font-medium text-foreground font-mono">
+                  {credentials.pochiPhoneNumber}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <span className="font-medium text-pochi">Active</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Features */}
         <div className="bg-muted/50 rounded-xl p-4 mb-6">
           <h3 className="text-sm font-medium text-foreground mb-3">Active Features</h3>
@@ -99,6 +122,18 @@ export function MpesaSettingsModal({
               <span className="text-income">✓</span>
               Transaction categorization
             </li>
+            {credentials.hasPochi && (
+              <>
+                <li className="flex items-center gap-2">
+                  <span className="text-pochi">✓</span>
+                  Pochi la Biashara sync
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-pochi">✓</span>
+                  Business wallet tracking
+                </li>
+              </>
+            )}
           </ul>
         </div>
 

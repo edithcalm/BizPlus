@@ -1,4 +1,4 @@
-import { TrendingUp, Smartphone, Banknote, ShoppingCart, Zap, Truck } from 'lucide-react';
+import { TrendingUp, Smartphone, Banknote, ShoppingCart, Zap, Truck, Wallet } from 'lucide-react';
 import { WeeklyChart } from '@/components/reports/WeeklyChart';
 import { weeklyData, mockDailySummaries } from '@/lib/mockData';
 import { formatCurrency } from '@/lib/formatters';
@@ -27,11 +27,16 @@ export function ReportsView() {
   const realCashTotal = transactions
     .filter(t => t.type === 'income' && t.method === 'cash')
     .reduce((sum, t) => sum + t.amount, 0);
+
+  const realPochiTotal = transactions
+    .filter(t => t.type === 'income' && (t.method === 'pochi' || t.source === 'pochi'))
+    .reduce((sum, t) => sum + t.amount, 0);
   
   // Use real data if available, otherwise fall back to mock
   const mpesaTotal = realMpesaTotal || mockDailySummaries.reduce((sum, d) => sum + d.mpesaSales, 0);
   const cashTotal = realCashTotal || mockDailySummaries.reduce((sum, d) => sum + d.cashSales, 0);
-  const totalSales = mpesaTotal + cashTotal;
+  const pochiTotal = realPochiTotal || mockDailySummaries.reduce((sum, d) => sum + d.pochiSales, 0);
+  const totalSales = mpesaTotal + cashTotal + pochiTotal || 1; // Avoid division by zero
   
   const expenseCategories = [
     { name: 'Stock Purchase', amount: 4500, icon: ShoppingCart, color: 'expense' },
@@ -51,7 +56,7 @@ export function ReportsView() {
         <div className="text-center py-3 sm:py-4 mb-4">
           <p className="text-xs sm:text-sm text-muted-foreground mb-1">Weekly Profit</p>
           <p className={cn(
-            'text-2xl sm:text-amount tabular-nums',
+            'text-2xl sm:text-amount tabular-nums font-bold',
             weeklyProfit >= 0 ? 'text-income' : 'text-expense'
           )}>
             KES {formatCurrency(weeklyProfit)}
@@ -79,7 +84,7 @@ export function ReportsView() {
         <WeeklyChart data={weeklyData} />
       </div>
       
-      {/* Payment Methods Breakdown */}
+      {/* Payment Methods Breakdown - Three-way: M-Pesa, Pochi, Cash */}
       <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card animate-slide-up stagger-2">
         <h3 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Payment Methods</h3>
         
@@ -91,7 +96,7 @@ export function ReportsView() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-sm">M-Pesa</span>
+                <span className="font-medium text-sm">M-Pesa (Till/Paybill)</span>
                 <span className="text-xs sm:text-sm font-semibold tabular-nums">
                   KES {formatCurrency(mpesaTotal)}
                 </span>
@@ -99,11 +104,35 @@ export function ReportsView() {
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-mpesa rounded-full transition-all duration-500"
-                  style={{ width: `${totalSales > 0 ? (mpesaTotal / totalSales) * 100 : 0}%` }}
+                  style={{ width: `${(mpesaTotal / totalSales) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {totalSales > 0 ? Math.round((mpesaTotal / totalSales) * 100) : 0}% of sales
+                {Math.round((mpesaTotal / totalSales) * 100)}% of sales
+              </p>
+            </div>
+          </div>
+
+          {/* Pochi la Biashara */}
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-pochi/10 flex items-center justify-center shrink-0">
+              <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-pochi" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-medium text-sm">Pochi la Biashara</span>
+                <span className="text-xs sm:text-sm font-semibold tabular-nums">
+                  KES {formatCurrency(pochiTotal)}
+                </span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-pochi rounded-full transition-all duration-500"
+                  style={{ width: `${(pochiTotal / totalSales) * 100}%` }}
+                />
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                {Math.round((pochiTotal / totalSales) * 100)}% of sales
               </p>
             </div>
           </div>
@@ -123,11 +152,11 @@ export function ReportsView() {
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-cash rounded-full transition-all duration-500"
-                  style={{ width: `${totalSales > 0 ? (cashTotal / totalSales) * 100 : 0}%` }}
+                  style={{ width: `${(cashTotal / totalSales) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {totalSales > 0 ? Math.round((cashTotal / totalSales) * 100) : 0}% of sales
+                {Math.round((cashTotal / totalSales) * 100)}% of sales
               </p>
             </div>
           </div>

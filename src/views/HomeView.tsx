@@ -81,9 +81,10 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
   const handleMpesaConnect = async (
     tillOrPaybill: string,
     type: 'till' | 'paybill',
-    businessName: string
+    businessName: string,
+    pochiPhone?: string
   ) => {
-    await connect(tillOrPaybill, type, businessName);
+    await connect(tillOrPaybill, type, businessName, pochiPhone);
   };
 
   return (
@@ -94,6 +95,8 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
         businessName={credentials?.businessName}
         tillNumber={credentials?.tillNumber}
         paybillNumber={credentials?.paybillNumber}
+        pochiPhoneNumber={credentials?.pochiPhoneNumber}
+        hasPochi={credentials?.hasPochi}
         lastFetch={lastFetch}
         isFetching={isFetching}
         onConnect={() => setShowMpesaConnect(true)}

@@ -1,8 +1,12 @@
+export type PaymentMethod = 'mpesa' | 'cash' | 'pochi';
+export type TransactionSource = 'till' | 'paybill' | 'pochi' | 'cash';
+
 export interface Transaction {
   id: string;
   type: 'income' | 'expense';
   amount: number;
-  method: 'mpesa' | 'cash';
+  method: PaymentMethod;
+  source?: TransactionSource;
   description: string;
   date: Date;
   category?: string;
@@ -26,7 +30,7 @@ export interface CreditPayment {
   id: string;
   amount: number;
   date: Date;
-  method: 'mpesa' | 'cash';
+  method: PaymentMethod;
 }
 
 export interface DailySummary {
@@ -36,6 +40,7 @@ export interface DailySummary {
   netProfit: number;
   mpesaSales: number;
   cashSales: number;
+  pochiSales: number;
   expectedCash: number;
   actualCash?: number;
   variance?: number;
@@ -57,6 +62,7 @@ export interface ParsedMpesa {
   party: string;
   date: Date;
   balance?: number;
+  source?: TransactionSource;
 }
 
 export interface SalesForecast {

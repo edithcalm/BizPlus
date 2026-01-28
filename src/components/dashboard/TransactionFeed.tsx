@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowDownLeft, ArrowUpRight, Smartphone, Banknote, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Smartphone, Banknote, RefreshCw, Wifi, WifiOff, Wallet } from 'lucide-react';
 import { Transaction } from '@/types/bizplus';
-import { formatCurrency, formatRelativeTime, formatTime } from '@/lib/formatters';
+import { formatCurrency, formatTime } from '@/lib/formatters';
+import { getSourceLabel } from '@/lib/mpesaApi';
 import { cn } from '@/lib/utils';
 
 interface TransactionFeedProps {
@@ -27,6 +28,25 @@ export function TransactionFeed({
       return () => clearTimeout(timer);
     }
   }, [transactions.length]);
+
+  const getMethodIcon = (method: string, source?: string) => {
+    if (method === 'pochi' || source === 'pochi') {
+      return <Wallet className="h-3 w-3 text-pochi" />;
+    }
+    if (method === 'cash') {
+      return <Banknote className="h-3 w-3 text-cash" />;
+    }
+    return <Smartphone className="h-3 w-3 text-mpesa" />;
+  };
+
+  const getMethodLabel = (method: string, source?: string) => {
+    if (source) {
+      return getSourceLabel(source as any);
+    }
+    if (method === 'pochi') return 'Pochi la Biashara';
+    if (method === 'cash') return 'Cash';
+    return 'M-Pesa';
+  };
 
   return (
     <div className="bg-card rounded-xl sm:rounded-2xl shadow-card overflow-hidden">
@@ -63,7 +83,7 @@ export function TransactionFeed({
             <>
               <Wifi className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">Waiting for transactions...</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">New M-Pesa payments will appear here</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">New M-Pesa & Pochi payments will appear here</p>
             </>
           ) : (
             <>
@@ -103,19 +123,27 @@ export function TransactionFeed({
               <p className="font-medium text-foreground text-sm truncate">
                 {transaction.customerName || transaction.description}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {transaction.method === 'mpesa' ? (
-                  <Smartphone className="h-3 w-3 text-mpesa" />
-                ) : (
-                  <Banknote className="h-3 w-3 text-cash" />
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                {getMethodIcon(transaction.method, transaction.source)}
+                <span className="text-[10px] sm:text-xs text-muted-foreground">
+                  {getMethodLabel(transaction.method, transaction.source)}
+                </span>
+                {transaction.mpesaCode && (
+                  <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">
+                    • {transaction.mpesaCode}
+                  </span>
                 )}
                 <span className="text-[10px] sm:text-xs text-muted-foreground">
-                  {transaction.mpesaCode && (
-                    <span className="font-mono">{transaction.mpesaCode} • </span>
-                  )}
-                  {formatTime(transaction.date)}
+                  • {formatTime(transaction.date)}
                 </span>
               </div>
+              {/* Source Badge */}
+              {transaction.source === 'pochi' && (
+                <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-pochi/10 text-pochi text-[9px] sm:text-[10px] font-medium rounded-full">
+                  <Wallet className="h-2.5 w-2.5" />
+                  Pochi la Biashara
+                </span>
+              )}
             </div>
             
             {/* Amount */}
