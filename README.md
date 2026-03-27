@@ -64,29 +64,29 @@ BizPlus provides:
 
 > Update these placeholders with your real links and test credentials.
 
-### Web Live Demo (if applicable)
+### Web Live Demo
 
-- **App URL**: [BizPlus Web App](TODO_ADD_WEB_DEMO_LINK_HERE)
+- **App URL**: [BizPlus Web App](https://biz-grow-chat.lovable.app)
 
 - **Test Login – Owner**
-  - Email/Phone: `TODO_OWNER_LOGIN_HERE`
-  - Password: `TODO_OWNER_PASSWORD_HERE`
+  - Email/Phone: `0765432512`
+  - Password: `1111`
 
 - **Test Login – Staff**
-  - Email/Phone: `TODO_STAFF_LOGIN_HERE`
-  - Password: `TODO_STAFF_PASSWORD_HERE`
+  - Email/Phone: `0754723421`
+  - Password: `1212`
 
 ### Android APK
 
 - **Download APK**: [BizPlus APK on Google Drive](TODO_ADD_GOOGLE_DRIVE_APK_LINK_HERE)
 
 - **Test Account – Owner**
-  - Phone: `TODO_OWNER_PHONE_HERE`
-  - PIN/Password: `TODO_OWNER_PIN_HERE`
+  - Phone: `0765432512`
+  - PIN/Password: `1111`
 
 - **Test Account – Staff / Cashier**
-  - Phone: `TODO_STAFF_PHONE_HERE`
-  - PIN/Password: `TODO_STAFF_PIN_HERE`
+  - Phone: `0754723421`
+  - PIN/Password: `1212`
 
 *(For the hackathon submission, ensure at least one of the above links is working and publicly accessible.)*
 
@@ -112,27 +112,27 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 > Replace the options below with the exact stack you used.
 
 - **Frontend / Mobile**
-  - Framework: `TODO_CHOOSE_ONE (e.g. React Native / Flutter / Native Android / Kotlin)`
-  - UI Components: `TODO (e.g. React Native Paper / Material Design / Tailwind CSS / custom)`
+  - Framework: `React Native / Flutter / Native Android / Kotlin`
+  - UI Components: `React Native Paper / Material Design / Tailwind CSS / custom`
 
 - **Backend & APIs**
-  - Backend: `TODO (e.g. Node.js with Express / Django / Laravel / Firebase / Supabase)`
-  - Database: `TODO (e.g. PostgreSQL / MySQL / MongoDB / Firebase Firestore / SQLite)`
-  - Authentication: `TODO (e.g. JWT / Firebase Auth / custom auth)`
-  - M‑Pesa Integration: `TODO (e.g. Safaricom Daraja API / SMS parsing / other)`
+  - Backend: `Node.js with Express / Django / Laravel / Firebase / Supabase`
+  - Database: `PostgreSQL / MySQL / MongoDB / Firebase Firestore / SQLite`
+  - Authentication: `JWT / Firebase Auth / custom auth`
+  - M‑Pesa Integration: `Safaricom Daraja API / SMS parsing / other`
 
 - **DevOps & Infrastructure**
-  - Hosting: `TODO (e.g. Vercel / Netlify / Render / Railway / AWS / GCP / Azure)`
-  - CI/CD: `TODO (e.g. GitHub Actions / none)`
+  - Hosting: `Vercel / Netlify / Render / Railway / AWS / GCP / Azure`
+  - CI/CD: `GitHub Actions / none`
 
 - **AI / Data Tools (if applicable)**
-  - AI Models / APIs: `TODO (e.g. OpenAI / Gemini / Anthropic)`  
-  - Analytics: `TODO (e.g. rule‑based insights / ML models for trends)`
+  - AI Models / APIs: `OpenAI / Gemini / Anthropic`  
+  - Analytics: `rule‑based insights / ML models for trends`
 
 - **Development Tools**
-  - Languages: `TODO (e.g. TypeScript / JavaScript / Dart / Java / Kotlin / Python)`
-  - Package Managers: `TODO (e.g. npm / yarn / pnpm / pip)`
-  - Design: `TODO (e.g. Figma / Canva)` for UI/UX and mockups.
+  - Languages: `TypeScript / JavaScript / Dart / Java / Kotlin / Python`
+  - Package Managers: `npm / yarn / pnpm / pip`
+  - Design: `Figma / Canva` for UI/UX and mockups.
 
 ---
 
@@ -140,21 +140,22 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 
 > Fill in your real team details.
 
-- **TODO_YOUR_NAME – Team Lead / Full‑Stack Developer**  
+- **Edith Karanja –  Full‑Stack Developer**  
   - Responsibilities: overall architecture, core features, integrations, coordination.
 
-- **TODO_TEAMMATE_1_NAME – Mobile Developer / Frontend Engineer**  
+- **Sheila Chesire – Mobile Developer / Frontend Engineer**  
   - Responsibilities: UI implementation, navigation, state management, UX.
 
-- **TODO_TEAMMATE_2_NAME – Backend Developer / DevOps**  
+- **Wendy Atieno – Backend Developer / DevOps**  
   - Responsibilities: API design, database, deployment, M‑Pesa integration.
 
 - **TODO_TEAMMATE_3_NAME – Product / UX / Research**  
   - Responsibilities: user research, flows, testing with SMEs, documentation.
 
 - **Contributors**
-  - `TODO_NAME` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
-  - `TODO_NAME` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
+  - `Wendy Atieno` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
+  - `Edith Karanja` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
+  - `Sheila Chesire` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
 
 ---
 
