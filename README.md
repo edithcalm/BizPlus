@@ -65,10 +65,10 @@ BizPlus provides:
 
 ### Web Live Demo
 
-- **App URL**: [BizPlus Web App](https://biz-grow-chat.lovable.app)
+- **App URL**: [BizPlus Web App]([https://biz-grow-chat.lovable.app](https://bizplus.vercel.app))
 
 - **Test Login – Owner**
-  - Email/Phone: `0765432512`
+  - Email/Phone: `0798111222`
   - Password: `111111`
 
 - **Test Login – Staff**
@@ -148,7 +148,7 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 - **Wendy Atieno – Backend Developer / DevOps**  
   - Responsibilities: API design, database, deployment, M‑Pesa integration.
 
-- **TODO_TEAMMATE_3_NAME – Product / UX / Research**  
+- **Wesley Njenga – Product / UX / Research**  
   - Responsibilities: user research, flows, testing with SMEs, documentation.
 
 - **Contributors**
