@@ -27,7 +27,7 @@ BizPlus provides:
 
 ## 2. Key Features (with Screenshots)
 
-> Replace the image paths/links below with your actual screenshots.
+
 
 - **Smart Dashboard – Daily Profit at a Glance**  
   - Shows today’s sales, expenses, and profit in one screen.  
@@ -62,7 +62,6 @@ BizPlus provides:
 
 ## 3. Live Demo / APK Download (Mandatory)
 
-> Update these placeholders with your real links and test credentials.
 
 ### Web Live Demo
 
@@ -88,7 +87,7 @@ BizPlus provides:
   - Phone: `0754723421`
   - PIN/Password: `1212`
 
-*(For the hackathon submission, ensure at least one of the above links is working and publicly accessible.)*
+
 
 ---
 
@@ -109,7 +108,7 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 
 ## 5. Tools, Technologies & Frameworks Used
 
-> Replace the options below with the exact stack you used.
+
 
 - **Frontend / Mobile**
   - Framework: `React Native / Flutter / Native Android / Kotlin`
@@ -138,7 +137,7 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 
 ## 6. Collaborators & Roles
 
-> Fill in your real team details.
+
 
 - **Edith Karanja –  Full‑Stack Developer**  
   - Responsibilities: overall architecture, core features, integrations, coordination.
@@ -153,39 +152,88 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
   - Responsibilities: user research, flows, testing with SMEs, documentation.
 
 - **Contributors**
-  - `Wendy Atieno` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
-  - `Edith Karanja` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
-  - `Sheila Chesire` – `TODO_SHORT_CONTRIBUTION_DESCRIPTION`
+  - `Wendy Atieno` 
+  - `Edith Karanja`
+  - `Sheila Chesire`
 
 ---
 
 ## 7. Getting Started
 
-> This section helps judges and testers run the project quickly.
+
 
 ### Prerequisites
 
-- `TODO` (e.g. Node.js / Java / Flutter SDK, depending on your stack).
+- (e.g. Node.js / Java / Flutter SDK, depending on your stack).
 - Android Studio or a physical Android device for running the APK.
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone TODO_ADD_REPO_URL_HERE
+git clone https://github.com/edithcalm/BizPlus.git
 cd bizplus
 
 # Install dependencies (example for a JavaScript/TypeScript project)
 npm install
 
-# Run the app (example for React Native)
-npm run android
+# Configure environment variables
+# Copy .env.example to .env and fill in your Supabase project URL + anon key
+
+# Run the app
+npm run dev
 ```
 
 ---
 
+## 9. Supabase Setup (Required for real user saving)
+
+This frontend uses **Supabase Auth + Supabase Postgres** to persist users.
+
+### Create the `profiles` table
+
+Run this SQL in Supabase (SQL Editor):
+
+```sql
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  phone text not null,
+  role text not null check (role in ('owner', 'staff')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+-- Allow a signed-in user to create/update their own profile row
+create policy "profiles_upsert_own"
+on public.profiles
+for insert
+to authenticated
+with check (auth.uid() = id);
+
+create policy "profiles_update_own"
+on public.profiles
+for update
+to authenticated
+using (auth.uid() = id)
+with check (auth.uid() = id);
+
+create policy "profiles_select_own"
+on public.profiles
+for select
+to authenticated
+using (auth.uid() = id);
+```
+
+### Configure Auth
+
+- In Supabase Dashboard → Authentication → Providers:
+  - Enable **Email** provider (password auth).
+  - For local demo, you may want to disable email confirmations (optional).
+
+
 ## 8. License (Optional)
 
-> Add a license if required by the hackathon or your team.
+
 
 `TODO_ADD_LICENSE_INFO_HERE (e.g. MIT License)`
