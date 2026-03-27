@@ -69,11 +69,11 @@ BizPlus provides:
 
 - **Test Login – Owner**
   - Email/Phone: `0765432512`
-  - Password: `1111`
+  - Password: `111111`
 
 - **Test Login – Staff**
   - Email/Phone: `0754723421`
-  - Password: `1212`
+  - Password: `121212`
 
 ### Android APK
 

@@ -14,14 +14,17 @@ export default function AuthPage() {
 
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
+  const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<BizPlusRole>("owner");
   const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(() => {
     const p = phone.trim();
     const x = pin.trim();
+    const n = fullName.trim();
+    if (tab === "signup") return p.length >= 9 && x.length >= 4 && n.length >= 2;
     return p.length >= 9 && x.length >= 4;
-  }, [phone, pin]);
+  }, [phone, pin, fullName, tab]);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -29,6 +32,37 @@ export default function AuthPage() {
       if (data.session) navigate("/app", { replace: true });
     });
   }, [navigate]);
+
+  if (!isSupabaseConfigured || !supabase) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-card border rounded-2xl p-5 shadow-card space-y-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Login</h1>
+            <p className="text-sm text-muted-foreground">
+              Cloud accounts aren’t enabled yet on this build.
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-muted p-3 text-sm text-muted-foreground">
+            To enable login + database saving:
+            <div className="mt-2 space-y-1">
+              <div>1) Create a Supabase project</div>
+              <div>2) Copy <code className="font-mono">.env.example</code> to <code className="font-mono">.env</code></div>
+              <div>3) Set <code className="font-mono">VITE_SUPABASE_URL</code> and <code className="font-mono">VITE_SUPABASE_ANON_KEY</code></div>
+              <div>4) Run the SQL in <code className="font-mono">README.md</code> to create <code className="font-mono">profiles</code></div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button className="w-full" variant="secondary" onClick={() => navigate("/", { replace: true })}>
+              Back to app
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const onSubmit = async () => {
     if (!canSubmit) return;
@@ -38,7 +72,7 @@ export default function AuthPage() {
         await signInWithPhonePin({ phone, pin });
         toast({ title: "Welcome back", description: "Signed in successfully." });
       } else {
-        await signUpWithPhonePin({ phone, pin, role });
+        await signUpWithPhonePin({ phone, pin, role, fullName });
         toast({ title: "Account created", description: "You can now use BizPlus." });
       }
       navigate("/app", { replace: true });
@@ -91,17 +125,29 @@ export default function AuthPage() {
             </div>
 
             <TabsContent value="signup" className="m-0">
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Role</label>
-                <Select value={role} onValueChange={(v) => setRole(v as BizPlusRole)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="staff">Staff</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Full name</label>
+                  <Input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Wendy Atieno"
+                    autoComplete="name"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Role</label>
+                  <Select value={role} onValueChange={(v) => setRole(v as BizPlusRole)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </TabsContent>
 
@@ -112,6 +158,7 @@ export default function AuthPage() {
             <p className="text-xs text-muted-foreground">
               Note: for now, phone+PIN is stored using Supabase Auth via an internal email alias.
             </p>
+
           </div>
         </Tabs>
       </div>

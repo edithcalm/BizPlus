@@ -13,6 +13,7 @@ export async function signUpWithPhonePin(params: {
   phone: string;
   pin: string;
   role: BizPlusRole;
+  fullName: string;
 }) {
   if (!supabase) {
     throw new Error(
@@ -28,14 +29,23 @@ export async function signUpWithPhonePin(params: {
       data: {
         phone: params.phone,
         role: params.role,
+        full_name: params.fullName,
       },
     },
   });
 
   if (error) throw error;
 
-  // Create a profile row in Postgres (requires you to create the table + RLS policy).
-  if (data.user) {
+  // If email confirmation is enabled in Supabase, signUp returns no session.
+  // This app uses phone->email aliases, so confirmation emails are not practical.
+  if (!data.session) {
+    throw new Error(
+      "Signup created a user but no session. In Supabase, go to Authentication > Providers > Email and disable 'Confirm email' for this phone+PIN flow.",
+    );
+  }
+
+  // Create a profile row in Postgres (requires the profiles table + policies from README).
+  if (data.user && data.session) {
     const { error: profileError } = await supabase.from("profiles").upsert(
       {
         id: data.user.id,
@@ -45,7 +55,14 @@ export async function signUpWithPhonePin(params: {
       },
       { onConflict: "id" },
     );
-    if (profileError) throw profileError;
+    if (profileError) {
+      if ((profileError as { code?: string }).code === "42P01") {
+        throw new Error(
+          "Profiles table not found. Run the SQL in README under 'Supabase Setup' to create public.profiles and RLS policies.",
+        );
+      }
+      throw profileError;
+    }
   }
 
   return data;

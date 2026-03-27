@@ -12,8 +12,8 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 const queryClient = new QueryClient();
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  // If Supabase isn't configured yet, don't block the UI.
-  if (!isSupabaseConfigured || !supabase) return <>{children}</>;
+  // If Supabase isn't configured, we can't authenticate: send to /auth (setup screen).
+  if (!isSupabaseConfigured || !supabase) return <Navigate to="/auth" replace />;
 
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
@@ -51,13 +51,15 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
           <Route
-            path="/auth"
+            path="/"
             element={
-              isSupabaseConfigured ? <AuthPage /> : <Navigate to="/" replace />
+              <RequireAuth>
+                <Index />
+              </RequireAuth>
             }
           />
+          <Route path="/auth" element={<AuthPage />} />
           <Route
             path="/app"
             element={
