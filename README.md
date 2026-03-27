@@ -65,7 +65,7 @@ BizPlus provides:
 
 ### Web Live Demo
 
-- **App URL**: [BizPlus Web App](https://biz-grow-chat.lovable.app)
+- **App URL**: [BizPlus Web App](https://bizplus.vercel.app)
 
 - **Test Login – Owner**
   - Email/Phone: `0765432512`
