@@ -9,6 +9,7 @@ import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
 import { MpesaConnectionModal } from '@/components/modals/MpesaConnectionModal';
 import { MpesaSettingsModal } from '@/components/modals/MpesaSettingsModal';
 import { useMpesaConnection } from '@/hooks/useMpesaConnection';
+import { toast } from '@/hooks/use-toast';
 import { DailySummary } from '@/types/bizplus';
 import {
   canShowSalesForecast,
@@ -70,6 +71,10 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
       actualCash,
       variance: actualCash - todaySummary.expectedCash,
     });
+    toast({
+      title: 'Cash check saved',
+      description: 'Your end-of-day cash count was recorded successfully.',
+    });
   };
 
   const handleAddTransaction = (data: {
@@ -85,6 +90,13 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
       description: data.description,
       date: new Date(),
       category: data.category,
+    });
+    toast({
+      title: transactionType === 'income' ? 'Income added' : 'Expense added',
+      description:
+        transactionType === 'income'
+          ? 'Your income was recorded successfully.'
+          : 'Your expense was recorded successfully.',
     });
   };
 

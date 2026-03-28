@@ -64,7 +64,7 @@ export function MpesaConnectionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in"
