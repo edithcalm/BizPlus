@@ -1,15 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Users, AlertTriangle, Search } from 'lucide-react';
 import { CreditCard } from '@/components/credits/CreditCard';
 import { ReminderModal } from '@/components/modals/ReminderModal';
 import { Button } from '@/components/ui/button';
-import { mockCredits } from '@/lib/mockData';
 import { CreditEntry } from '@/types/bizplus';
 import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
+const CREDITS_STORAGE_KEY = 'bizplus_credits';
+
+function loadCreditsFromStorage(): CreditEntry[] {
+  try {
+    const raw = localStorage.getItem(CREDITS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CreditEntry[];
+    return parsed.map((c) => ({
+      ...c,
+      date: new Date(c.date),
+      dueDate: c.dueDate ? new Date(c.dueDate) : undefined,
+      payments: (c.payments ?? []).map((p) => ({
+        ...p,
+        date: new Date(p.date),
+      })),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export function CreditsView() {
-  const [credits, setCredits] = useState<CreditEntry[]>(mockCredits);
+  const [credits, setCredits] = useState<CreditEntry[]>(loadCreditsFromStorage);
+
+  useEffect(() => {
+    localStorage.setItem(CREDITS_STORAGE_KEY, JSON.stringify(credits));
+  }, [credits]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'overdue'>('all');
   const [selectedCredit, setSelectedCredit] = useState<CreditEntry | null>(null);
   const [showReminder, setShowReminder] = useState(false);
@@ -71,8 +95,17 @@ export function CreditsView() {
           <div className="min-w-0">
             <p className="text-xs sm:text-sm text-muted-foreground">Total Outstanding</p>
             <p className="text-xl sm:text-amount text-foreground tabular-nums truncate">
-              KES {formatCurrency(totalOutstanding)}
+              {credits.length === 0 ? (
+                <span className="text-muted-foreground">—</span>
+              ) : (
+                <>KES {formatCurrency(totalOutstanding)}</>
+              )}
             </p>
+            {credits.length === 0 && (
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+                Add credit sales to see amounts owed here.
+              </p>
+            )}
           </div>
         </div>
         

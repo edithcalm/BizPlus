@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { SummaryCard } from '@/components/dashboard/SummaryCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { MpesaStatus } from '@/components/dashboard/MpesaStatus';
@@ -10,6 +10,11 @@ import { MpesaConnectionModal } from '@/components/modals/MpesaConnectionModal';
 import { MpesaSettingsModal } from '@/components/modals/MpesaSettingsModal';
 import { useMpesaConnection } from '@/hooks/useMpesaConnection';
 import { DailySummary } from '@/types/bizplus';
+import {
+  canShowSalesForecast,
+  computeSalesForecastFromTransactions,
+} from '@/lib/weeklyReports';
+import type { SalesForecastData } from '@/components/dashboard/SalesForecast';
 
 interface HomeViewProps {
   onViewAllTransactions: () => void;
@@ -44,6 +49,11 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
     actualCash: reconciliationData.actualCash,
     variance: reconciliationData.variance,
   };
+
+  const salesForecast: SalesForecastData | null = useMemo(() => {
+    if (!canShowSalesForecast(transactions)) return null;
+    return computeSalesForecastFromTransactions(transactions);
+  }, [transactions]);
 
   const handleAddIncome = () => {
     setTransactionType('income');
@@ -125,14 +135,8 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
         onRefresh={() => fetchTransactions()}
       />
       
-      {/* Sales Forecast */}
-      <SalesForecast 
-        predictedMin={5500}
-        predictedMax={8200}
-        trend="up"
-        busyDays={['Fri', 'Sat']}
-        slowDays={['Mon', 'Wed']}
-      />
+      {/* Sales Forecast — amounts only when there is enough sales history */}
+      <SalesForecast forecast={salesForecast} />
       
       {/* Modals */}
       <ReconciliationModal 

@@ -59,18 +59,24 @@ export function AddTransactionModal({
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 animate-slide-up shadow-elevated max-h-[90vh] overflow-y-auto">
+      {/* Modal: flex column so the body scrolls and the submit button stays reachable on small screens / keyboard */}
+      <div
+        className={cn(
+          'relative w-full max-w-md bg-card rounded-t-3xl sm:rounded-2xl animate-slide-up shadow-elevated',
+          'flex min-h-0 max-h-[90dvh] flex-col overflow-hidden sm:max-h-[min(90dvh,720px)]'
+        )}
+      >
         {/* Close button */}
         <button 
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 z-10 p-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
         
         {/* Header */}
-        <div className="flex items-center gap-3 mb-5 sm:mb-6">
+        <div className="flex shrink-0 items-center gap-3 px-5 pt-5 pb-2 sm:p-6 sm:pb-3 pr-14">
           <div className={cn(
             'h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center shrink-0',
             type === 'income' ? 'bg-income/10' : 'bg-expense/10'
@@ -90,7 +96,8 @@ export function AddTransactionModal({
             </p>
           </div>
         </div>
-        
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-5 pb-2 sm:px-6 [-webkit-overflow-scrolling:touch]">
         {/* Amount */}
         <div className="mb-4">
           <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
@@ -200,17 +207,21 @@ export function AddTransactionModal({
             ))}
           </div>
         </div>
-        
-        {/* Submit Button */}
-        <Button 
-          onClick={handleSubmit}
-          disabled={!isValid}
-          variant={type === 'income' ? 'income' : 'destructive'}
-          className="w-full"
-          size="lg"
-        >
-          Add {type === 'income' ? 'Income' : 'Expense'}
-        </Button>
+        </div>
+
+        {/* Submit — fixed to bottom of sheet so it stays tappable while fields scroll above */}
+        <div className="shrink-0 border-t border-border/60 bg-card px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:rounded-b-2xl sm:px-6">
+          <Button 
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isValid}
+            variant={type === 'income' ? 'income' : 'destructive'}
+            className="w-full"
+            size="lg"
+          >
+            Add {type === 'income' ? 'Income' : 'Expense'}
+          </Button>
+        </div>
       </div>
     </div>
   );

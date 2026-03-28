@@ -1,8 +1,8 @@
-import { TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Calendar, LineChart } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
-interface SalesForecastProps {
+export interface SalesForecastData {
   predictedMin: number;
   predictedMax: number;
   trend: 'up' | 'down' | 'stable';
@@ -10,13 +10,12 @@ interface SalesForecastProps {
   slowDays: string[];
 }
 
-export function SalesForecast({ 
-  predictedMin, 
-  predictedMax, 
-  trend, 
-  busyDays, 
-  slowDays 
-}: SalesForecastProps) {
+interface SalesForecastProps {
+  /** When null, show a no-data state (e.g. new user or not enough history). */
+  forecast: SalesForecastData | null;
+}
+
+export function SalesForecast({ forecast }: SalesForecastProps) {
   return (
     <div className="bg-card rounded-2xl p-5 shadow-card animate-slide-up stagger-3">
       <div className="flex items-center gap-2 mb-4">
@@ -28,7 +27,32 @@ export function SalesForecast({
           <p className="text-xs text-muted-foreground">Based on your sales history</p>
         </div>
       </div>
-      
+
+      {forecast === null ? (
+        <div className="rounded-xl border border-dashed border-muted-foreground/25 bg-muted/30 p-6 text-center">
+          <LineChart className="h-10 w-10 text-muted-foreground/60 mx-auto mb-3" />
+          <p className="text-sm font-medium text-foreground mb-1">Not enough data yet</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            After you have sales on more than one day, we will estimate a range and highlight your
+            busier and slower days.
+          </p>
+        </div>
+      ) : (
+        <SalesForecastInner {...forecast} />
+      )}
+    </div>
+  );
+}
+
+function SalesForecastInner({
+  predictedMin,
+  predictedMax,
+  trend,
+  busyDays,
+  slowDays,
+}: SalesForecastData) {
+  return (
+    <>
       {/* Predicted Range */}
       <div className="bg-secondary/50 rounded-xl p-4 mb-4">
         <p className="text-sm text-muted-foreground mb-2">Expected Sales Range</p>
@@ -65,9 +89,9 @@ export function SalesForecast({
         <div>
           <p className="text-xs text-muted-foreground mb-2">🔥 Usually Busy</p>
           <div className="flex flex-wrap gap-1">
-            {busyDays.map((day) => (
+            {busyDays.map((day, i) => (
               <span 
-                key={day}
+                key={`${day}-${i}`}
                 className="px-2 py-1 bg-income/10 text-income text-xs font-medium rounded-full"
               >
                 {day}
@@ -78,9 +102,9 @@ export function SalesForecast({
         <div>
           <p className="text-xs text-muted-foreground mb-2">😴 Usually Slow</p>
           <div className="flex flex-wrap gap-1">
-            {slowDays.map((day) => (
+            {slowDays.map((day, i) => (
               <span 
-                key={day}
+                key={`${day}-${i}`}
                 className="px-2 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-full"
               >
                 {day}
@@ -89,6 +113,6 @@ export function SalesForecast({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

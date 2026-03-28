@@ -1,48 +1,69 @@
-import { TrendingUp, Smartphone, Banknote, ShoppingCart, Zap, Truck, Wallet } from 'lucide-react';
+import { TrendingUp, Smartphone, Banknote, Wallet, BarChart3, Receipt } from 'lucide-react';
 import { WeeklyChart } from '@/components/reports/WeeklyChart';
-import { weeklyData, mockDailySummaries } from '@/lib/mockData';
 import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import { useMpesaConnection } from '@/hooks/useMpesaConnection';
+import {
+  getCurrentWeekBuckets,
+  getTopExpenseCategoriesThisWeek,
+  getTransactionsThisWeek,
+  hasAnyTransactionData,
+} from '@/lib/weeklyReports';
 
 export function ReportsView() {
   const { transactions } = useMpesaConnection();
-  
-  // Calculate weekly totals from actual transactions or use mock data
-  const weeklyTotals = weeklyData.reduce(
+
+  const hasData = hasAnyTransactionData(transactions);
+  const weekBuckets = getCurrentWeekBuckets(transactions);
+  const weeklyTotals = weekBuckets.reduce(
     (acc, day) => ({
       sales: acc.sales + day.sales,
       expenses: acc.expenses + day.expenses,
     }),
     { sales: 0, expenses: 0 }
   );
-  
   const weeklyProfit = weeklyTotals.sales - weeklyTotals.expenses;
-  
-  // Calculate from real transactions if available
-  const realMpesaTotal = transactions
-    .filter(t => t.type === 'income' && t.method === 'mpesa')
-    .reduce((sum, t) => sum + t.amount, 0);
-  
-  const realCashTotal = transactions
-    .filter(t => t.type === 'income' && t.method === 'cash')
+
+  const weekTx = getTransactionsThisWeek(transactions);
+
+  const mpesaTotal = weekTx
+    .filter((t) => t.type === 'income' && t.method === 'mpesa')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const realPochiTotal = transactions
-    .filter(t => t.type === 'income' && (t.method === 'pochi' || t.source === 'pochi'))
+  const cashTotal = weekTx
+    .filter((t) => t.type === 'income' && t.method === 'cash')
     .reduce((sum, t) => sum + t.amount, 0);
-  
-  // Use real data if available, otherwise fall back to mock
-  const mpesaTotal = realMpesaTotal || mockDailySummaries.reduce((sum, d) => sum + d.mpesaSales, 0);
-  const cashTotal = realCashTotal || mockDailySummaries.reduce((sum, d) => sum + d.cashSales, 0);
-  const pochiTotal = realPochiTotal || mockDailySummaries.reduce((sum, d) => sum + d.pochiSales, 0);
-  const totalSales = mpesaTotal + cashTotal + pochiTotal || 1; // Avoid division by zero
-  
-  const expenseCategories = [
-    { name: 'Stock Purchase', amount: 4500, icon: ShoppingCart, color: 'expense' },
-    { name: 'Utilities', amount: 1200, icon: Zap, color: 'warning' },
-    { name: 'Transport', amount: 800, icon: Truck, color: 'muted-foreground' },
-  ];
+
+  const pochiTotal = weekTx
+    .filter(
+      (t) =>
+        t.type === 'income' &&
+        (t.method === 'pochi' || t.source === 'pochi')
+    )
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalSales = mpesaTotal + cashTotal + pochiTotal;
+  const denom = totalSales > 0 ? totalSales : 1;
+
+  const expenseCategories = getTopExpenseCategoriesThisWeek(transactions, 5);
+
+  if (!hasData) {
+    return (
+      <div className="px-3 sm:px-4 pb-24 space-y-4 sm:space-y-6">
+        <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-card text-center animate-slide-up">
+          <BarChart3 className="h-12 w-12 text-muted-foreground/60 mx-auto mb-4" />
+          <h2 className="font-semibold text-foreground text-base sm:text-lg mb-2">
+            No reports yet
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+            Once you add transactions from M-Pesa or manually, weekly summaries, charts, and payment
+            breakdowns will use your real numbers — nothing is shown until you have data.
+          </p>
+        </div>
+        <WeeklyChart data={weekBuckets} empty />
+      </div>
+    );
+  }
 
   return (
     <div className="px-3 sm:px-4 pb-24 space-y-4 sm:space-y-6">
@@ -52,17 +73,19 @@ export function ReportsView() {
           <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           <h2 className="font-semibold text-foreground text-sm sm:text-base">Weekly Summary</h2>
         </div>
-        
+
         <div className="text-center py-3 sm:py-4 mb-4">
           <p className="text-xs sm:text-sm text-muted-foreground mb-1">Weekly Profit</p>
-          <p className={cn(
-            'text-2xl sm:text-amount tabular-nums font-bold',
-            weeklyProfit >= 0 ? 'text-income' : 'text-expense'
-          )}>
+          <p
+            className={cn(
+              'text-2xl sm:text-amount tabular-nums font-bold',
+              weeklyProfit >= 0 ? 'text-income' : 'text-expense'
+            )}
+          >
             KES {formatCurrency(weeklyProfit)}
           </p>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="bg-income/10 rounded-xl p-3 text-center">
             <p className="text-[10px] sm:text-xs text-muted-foreground mb-1">Total Sales</p>
@@ -78,16 +101,16 @@ export function ReportsView() {
           </div>
         </div>
       </div>
-      
+
       {/* Weekly Chart */}
       <div className="animate-slide-up stagger-1">
-        <WeeklyChart data={weeklyData} />
+        <WeeklyChart data={weekBuckets} />
       </div>
-      
+
       {/* Payment Methods Breakdown - Three-way: M-Pesa, Pochi, Cash */}
       <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card animate-slide-up stagger-2">
         <h3 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Payment Methods</h3>
-        
+
         <div className="space-y-4">
           {/* M-Pesa */}
           <div className="flex items-center gap-3">
@@ -102,13 +125,13 @@ export function ReportsView() {
                 </span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-mpesa rounded-full transition-all duration-500"
-                  style={{ width: `${(mpesaTotal / totalSales) * 100}%` }}
+                  style={{ width: `${(mpesaTotal / denom) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {Math.round((mpesaTotal / totalSales) * 100)}% of sales
+                {totalSales > 0 ? Math.round((mpesaTotal / totalSales) * 100) : 0}% of sales
               </p>
             </div>
           </div>
@@ -126,17 +149,17 @@ export function ReportsView() {
                 </span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-pochi rounded-full transition-all duration-500"
-                  style={{ width: `${(pochiTotal / totalSales) * 100}%` }}
+                  style={{ width: `${(pochiTotal / denom) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {Math.round((pochiTotal / totalSales) * 100)}% of sales
+                {totalSales > 0 ? Math.round((pochiTotal / totalSales) * 100) : 0}% of sales
               </p>
             </div>
           </div>
-          
+
           {/* Cash */}
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-cash/10 flex items-center justify-center shrink-0">
@@ -150,36 +173,36 @@ export function ReportsView() {
                 </span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-cash rounded-full transition-all duration-500"
-                  style={{ width: `${(cashTotal / totalSales) * 100}%` }}
+                  style={{ width: `${(cashTotal / denom) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {Math.round((cashTotal / totalSales) * 100)}% of sales
+                {totalSales > 0 ? Math.round((cashTotal / totalSales) * 100) : 0}% of sales
               </p>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Top Expense Categories */}
       <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card animate-slide-up stagger-3">
         <h3 className="font-semibold text-foreground mb-4 text-sm sm:text-base">Top Expenses</h3>
-        
-        <div className="space-y-2 sm:space-y-3">
-          {expenseCategories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <div 
+
+        {expenseCategories.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            No expenses recorded this week.
+          </p>
+        ) : (
+          <div className="space-y-2 sm:space-y-3">
+            {expenseCategories.map((category) => (
+              <div
                 key={category.name}
                 className="flex items-center gap-3 p-2.5 sm:p-3 bg-muted/50 rounded-xl"
               >
-                <div className={cn(
-                  'h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center shrink-0',
-                  `bg-${category.color}/10`
-                )}>
-                  <Icon className={cn('h-4 w-4 sm:h-5 sm:w-5', `text-${category.color}`)} />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-expense/10 flex items-center justify-center shrink-0">
+                  <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-expense" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-medium text-sm">{category.name}</span>
@@ -188,9 +211,9 @@ export function ReportsView() {
                   -{formatCurrency(category.amount)}
                 </span>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
