@@ -21,6 +21,11 @@ interface HomeViewProps {
   onViewAllTransactions: () => void;
 }
 
+/**
+ * The unified Home Dashboard view.
+ * Integrates M-Pesa status tracking, live transaction feeds, quick add actions,
+ * daily financial summaries, and a sales forecasting chart into a single page.
+ */
 export function HomeView({ onViewAllTransactions }: HomeViewProps) {
   const [showReconciliation, setShowReconciliation] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -101,12 +106,12 @@ export function HomeView({ onViewAllTransactions }: HomeViewProps) {
   };
 
   const handleMpesaConnect = async (
-    tillOrPaybill: string,
-    type: 'till' | 'paybill',
+    identifier: string,
+    type: 'till' | 'paybill' | 'pochi',
     businessName: string,
     pochiPhone?: string
   ) => {
-    await connect(tillOrPaybill, type, businessName, pochiPhone);
+    await connect(identifier, type, businessName, pochiPhone);
   };
 
   return (

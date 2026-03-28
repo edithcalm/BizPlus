@@ -1,5 +1,10 @@
-// Simulated M-Pesa Daraja API Service with Pochi la Biashara Support
-// In production, this would connect to Safaricom's sandbox/live API
+/**
+ * Simulated M-Pesa Daraja API Service containing Pochi la Biashara Support.
+ * 
+ * Note: In a real-world production environment, this code behaves as a placeholder 
+ * that would directly interact with Safaricom's Daraja Sandbox or Live APIs
+ * using authenticated OAuth API calls and registered webhooks.
+ */
 
 import { Transaction, TransactionSource, PaymentMethod } from '@/types/bizplus';
 
@@ -178,7 +183,10 @@ export const getDemoTransactions = (): MpesaTransaction[] => {
   ];
 };
 
-// Simulate fetching transactions from M-Pesa API
+/**
+ * Simulates fetching batched historical or recent transactions from an M-Pesa endpoint.
+ * Artificially delays output using a timeout for realism and bounds returned counts constraints.
+ */
 export const fetchMpesaTransactions = async (
   credentials: MpesaCredentials,
   count: number = 5
@@ -244,7 +252,9 @@ export const fetchMpesaTransactions = async (
   return transactions;
 };
 
-// Convert M-Pesa transaction to app Transaction format
+/**
+ * Converts a raw M-Pesa transaction object to a flattened internal standard 'Transaction' format.
+ */
 export const mpesaToTransaction = (mpesa: MpesaTransaction): Transaction => {
   const isIncome = mpesa.transactionType === 'RECEIVED' || 
                    mpesa.transactionType === 'BUYGOODS' || 
@@ -271,7 +281,10 @@ export const mpesaToTransaction = (mpesa: MpesaTransaction): Transaction => {
   };
 };
 
-// Simulate real-time transaction webhook
+/**
+ * Simulates an incoming real-time websocket/webhook transaction triggered randomly.
+ * Mimics a backend receiving a message event and updating frontend cache.
+ */
 export const simulateIncomingTransaction = (credentials: MpesaCredentials): MpesaTransaction | null => {
   if (!credentials.isConnected) return null;
   
@@ -328,10 +341,13 @@ export const validatePhoneNumber = (phone: string): boolean => {
   return /^0[17]\d{8}$/.test(phone);
 };
 
-// Simulate connecting to M-Pesa (OAuth flow simulation)
+/**
+ * Imitates an OAuth flow to authenticate and connect a business till/paybill/pochi account.
+ * Completes format validation before accepting identifiers.
+ */
 export const connectMpesaAccount = async (
-  tillOrPaybill: string,
-  type: 'till' | 'paybill',
+  identifier: string,
+  type: 'till' | 'paybill' | 'pochi',
   businessName: string,
   pochiPhoneNumber?: string
 ): Promise<MpesaCredentials> => {
@@ -339,20 +355,25 @@ export const connectMpesaAccount = async (
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   // Validate format
-  if (type === 'till' && !validateTillNumber(tillOrPaybill)) {
+  if (type === 'till' && !validateTillNumber(identifier)) {
     throw new Error('Invalid Till Number format. Should be 5-7 digits.');
   }
-  if (type === 'paybill' && !validatePaybillNumber(tillOrPaybill)) {
+  if (type === 'paybill' && !validatePaybillNumber(identifier)) {
     throw new Error('Invalid Paybill Number format. Should be 5-6 digits.');
   }
-  if (pochiPhoneNumber && !validatePhoneNumber(pochiPhoneNumber)) {
+  if (type === 'pochi' && !validatePhoneNumber(identifier)) {
+    throw new Error('Invalid phone number format. Should be 07XXXXXXXX or 01XXXXXXXX.');
+  }
+  
+  const phoneToUse = type === 'pochi' ? identifier : pochiPhoneNumber;
+  if (type !== 'pochi' && phoneToUse && !validatePhoneNumber(phoneToUse)) {
     throw new Error('Invalid phone number format. Should be 07XXXXXXXX or 01XXXXXXXX.');
   }
 
   return {
-    tillNumber: type === 'till' ? tillOrPaybill : undefined,
-    paybillNumber: type === 'paybill' ? tillOrPaybill : undefined,
-    pochiPhoneNumber: pochiPhoneNumber || undefined,
+    tillNumber: type === 'till' ? identifier : undefined,
+    paybillNumber: type === 'paybill' ? identifier : undefined,
+    pochiPhoneNumber: phoneToUse || undefined,
     businessName,
     isConnected: true,
     connectedAt: new Date(),

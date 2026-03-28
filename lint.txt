@@ -1,0 +1,49 @@
+﻿
+> vite_react_shadcn_ts@0.0.0 lint
+> eslint .
+
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\App.tsx
+  18:29  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   react-hooks/rules-of-hooks
+  19:31  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   react-hooks/rules-of-hooks
+  21:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\dashboard\TransactionFeed.tsx
+  44:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\reports\WeeklyChart.tsx
+  12:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\badge.tsx
+  29:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\button.tsx
+  55:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\command.tsx
+  24:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\form.tsx
+  129:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\navigation-menu.tsx
+  111:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\sidebar.tsx
+  636:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\sonner.tsx
+  27:19  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\src\components\ui\toggle.tsx
+  37:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\OneDrive\Documents\BizPlus\BizPlus\tailwind.config.ts
+  131:13  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+Γ£û 16 problems (9 errors, 7 warnings)
+

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowDownLeft, ArrowUpRight, Smartphone, Banknote, RefreshCw, Wifi, WifiOff, Wallet } from 'lucide-react';
-import { Transaction } from '@/types/bizplus';
+import { Transaction, TransactionSource } from '@/types/bizplus';
 import { formatCurrency, formatTime } from '@/lib/formatters';
 import { getSourceLabel } from '@/lib/mpesaApi';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,7 @@ export function TransactionFeed({
 
   const getMethodLabel = (method: string, source?: string) => {
     if (source) {
-      return getSourceLabel(source as any);
+      return getSourceLabel(source as TransactionSource);
     }
     if (method === 'pochi') return 'Pochi la Biashara';
     if (method === 'cash') return 'Cash';

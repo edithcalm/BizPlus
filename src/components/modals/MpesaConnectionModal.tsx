@@ -7,7 +7,7 @@ import { DEMO_PHONE_NUMBER } from '@/lib/mpesaApi';
 interface MpesaConnectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnect: (tillOrPaybill: string, type: 'till' | 'paybill', businessName: string, pochiPhone?: string) => Promise<void>;
+  onConnect: (identifier: string, type: 'till' | 'paybill' | 'pochi', businessName: string, pochiPhone?: string) => Promise<void>;
   isConnecting: boolean;
 }
 
@@ -17,12 +17,10 @@ export function MpesaConnectionModal({
   onConnect,
   isConnecting 
 }: MpesaConnectionModalProps) {
-  const [step, setStep] = useState<'type' | 'details' | 'pochi' | 'success'>('type');
-  const [connectionType, setConnectionType] = useState<'till' | 'paybill'>('till');
+  const [step, setStep] = useState<'type' | 'details' | 'success'>('type');
+  const [connectionType, setConnectionType] = useState<'till' | 'paybill' | 'pochi'>('till');
   const [number, setNumber] = useState('');
   const [businessName, setBusinessName] = useState('');
-  const [pochiEnabled, setPochiEnabled] = useState(false);
-  const [pochiPhone, setPochiPhone] = useState(DEMO_PHONE_NUMBER);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -31,7 +29,7 @@ export function MpesaConnectionModal({
     setError('');
     
     if (!number.trim()) {
-      setError(`Please enter your ${connectionType === 'till' ? 'Till' : 'Paybill'} number`);
+      setError(`Please enter your ${connectionType === 'till' ? 'Till' : connectionType === 'paybill' ? 'Paybill' : 'Phone'} number`);
       return;
     }
     
@@ -45,7 +43,7 @@ export function MpesaConnectionModal({
         number.trim(), 
         connectionType, 
         businessName.trim(),
-        pochiEnabled ? pochiPhone.trim() : undefined
+        undefined
       );
       setStep('success');
     } catch (e) {
@@ -57,8 +55,6 @@ export function MpesaConnectionModal({
     setStep('type');
     setNumber('');
     setBusinessName('');
-    setPochiEnabled(false);
-    setPochiPhone(DEMO_PHONE_NUMBER);
     setError('');
     onClose();
   };
@@ -114,6 +110,22 @@ export function MpesaConnectionModal({
 
               <button
                 onClick={() => {
+                  setConnectionType('pochi');
+                  setStep('details');
+                }}
+                className="w-full flex items-center gap-4 p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors text-left"
+              >
+                <div className="h-12 w-12 rounded-full bg-pochi/10 flex items-center justify-center shrink-0">
+                  <Wallet className="h-6 w-6 text-pochi" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground">Pochi la Biashara</h3>
+                  <p className="text-sm text-muted-foreground">For business wallets</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
                   setConnectionType('paybill');
                   setStep('details');
                 }}
@@ -152,7 +164,7 @@ export function MpesaConnectionModal({
               </button>
               <div>
                 <h2 className="text-lg font-bold text-foreground">
-                  Enter {connectionType === 'till' ? 'Till' : 'Paybill'} Details
+                  Enter {connectionType === 'till' ? 'Till' : connectionType === 'paybill' ? 'Paybill' : 'Pochi la Biashara'} Details
                 </h2>
                 <p className="text-sm text-muted-foreground">We'll verify your account</p>
               </div>
@@ -162,21 +174,28 @@ export function MpesaConnectionModal({
             <div className="space-y-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  {connectionType === 'till' ? 'Till Number' : 'Paybill Number'}
+                  {connectionType === 'till' ? 'Till Number' : connectionType === 'paybill' ? 'Paybill Number' : 'Phone Number'}
                 </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={number}
-                  onChange={(e) => setNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder={connectionType === 'till' ? 'e.g. 123456' : 'e.g. 247247'}
-                  className={cn(
-                    'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
-                    'focus:outline-none focus:ring-0 focus:border-primary transition-colors',
-                    'placeholder:text-muted-foreground'
+                <div className="relative">
+                  <input
+                    type={connectionType === 'pochi' ? 'tel' : 'text'}
+                    inputMode={connectionType === 'pochi' ? 'tel' : 'numeric'}
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value.replace(/\D/g, ''))}
+                    placeholder={connectionType === 'till' ? 'e.g. 123456' : connectionType === 'paybill' ? 'e.g. 247247' : 'e.g. 0721606409'}
+                    className={cn(
+                      'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
+                      'focus:outline-none focus:ring-0 focus:border-primary transition-colors',
+                      'placeholder:text-muted-foreground'
+                    )}
+                    maxLength={connectionType === 'pochi' ? 10 : 7}
+                  />
+                  {connectionType === 'pochi' && (
+                    <p className="text-xs text-muted-foreground mt-1 text-left">
+                      Demo: Use {DEMO_PHONE_NUMBER} for sample transactions
+                    </p>
                   )}
-                  maxLength={7}
-                />
+                </div>
               </div>
 
               <div>
@@ -197,70 +216,7 @@ export function MpesaConnectionModal({
               </div>
             </div>
 
-            {/* Pochi la Biashara Toggle */}
-            <div className="mb-6">
-              <button
-                onClick={() => setPochiEnabled(!pochiEnabled)}
-                className={cn(
-                  'w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
-                  pochiEnabled 
-                    ? 'border-pochi bg-pochi/5' 
-                    : 'border-border hover:border-pochi/50'
-                )}
-              >
-                <div className={cn(
-                  'h-10 w-10 rounded-full flex items-center justify-center shrink-0',
-                  pochiEnabled ? 'bg-pochi/10' : 'bg-muted'
-                )}>
-                  <Wallet className={cn(
-                    'h-5 w-5',
-                    pochiEnabled ? 'text-pochi' : 'text-muted-foreground'
-                  )} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className={cn(
-                    'font-semibold',
-                    pochiEnabled ? 'text-pochi' : 'text-foreground'
-                  )}>
-                    Pochi la Biashara
-                  </h3>
-                  <p className="text-xs text-muted-foreground">Add your business wallet</p>
-                </div>
-                <div className={cn(
-                  'h-6 w-6 rounded-full border-2 flex items-center justify-center',
-                  pochiEnabled 
-                    ? 'border-pochi bg-pochi' 
-                    : 'border-muted-foreground'
-                )}>
-                  {pochiEnabled && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </button>
 
-              {/* Pochi Phone Number */}
-              {pochiEnabled && (
-                <div className="mt-3 animate-fade-in">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Pochi Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={pochiPhone}
-                    onChange={(e) => setPochiPhone(e.target.value.replace(/[^\d]/g, ''))}
-                    placeholder="e.g. 0721606409"
-                    className={cn(
-                      'w-full px-4 py-3 bg-background border-2 rounded-xl text-base',
-                      'focus:outline-none focus:ring-0 focus:border-pochi transition-colors',
-                      'placeholder:text-muted-foreground'
-                    )}
-                    maxLength={10}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Demo: Use {DEMO_PHONE_NUMBER} for sample transactions
-                  </p>
-                </div>
-              )}
-            </div>
 
             {error && (
               <p className="text-sm text-destructive mb-4">{error}</p>
@@ -294,9 +250,9 @@ export function MpesaConnectionModal({
             <p className="text-muted-foreground mb-2">
               Your M-Pesa transactions will now sync automatically
             </p>
-            {pochiEnabled && (
+            {connectionType === 'pochi' && (
               <p className="text-sm text-pochi mb-4">
-                ✓ Pochi la Biashara enabled
+                ✓ Pochi la Biashara connected
               </p>
             )}
             <Button onClick={handleClose} className="w-full" size="lg">

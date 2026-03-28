@@ -11,15 +11,21 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
 const queryClient = new QueryClient();
 
+/**
+ * RequireAuth wrapping component.
+ * Validates the user's Supabase session and actively listes to auth state changes.
+ * Unauthorized users or instances without Supabase configured are redirected to /auth.
+ */
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  // If Supabase isn't configured, we can't authenticate: send to /auth (setup screen).
-  if (!isSupabaseConfigured || !supabase) return <Navigate to="/auth" replace />;
+  // Supabase connection checked below hooks to satisfy React Rules of Hooks
 
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+
+    if (!isSupabaseConfigured || !supabase) return;
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
@@ -39,11 +45,17 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  if (!isSupabaseConfigured || !supabase) return <Navigate to="/auth" replace />;
   if (!ready) return null;
   if (!authed) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
 
+/**
+ * App Root Component.
+ * Injects required global providers (Theme, Tooltips, React Query, Routing)
+ * and defines the application's route tree.
+ */
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

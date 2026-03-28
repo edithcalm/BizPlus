@@ -9,12 +9,12 @@ interface WeeklyChartProps {
 }
 
 export function WeeklyChart({ data, empty }: WeeklyChartProps) {
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; dataKey: string }[]; label?: string; }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-card border rounded-xl p-3 shadow-elevated">
           <p className="font-medium mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry: { name: string; value: number; dataKey: string }, index: number) => (
             <p key={index} className="text-sm">
               <span className="text-muted-foreground">{entry.name}: </span>
               <span className={entry.dataKey === 'sales' ? 'text-income' : 'text-expense'}>

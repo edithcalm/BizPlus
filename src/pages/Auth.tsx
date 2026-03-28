@@ -8,6 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { signInWithPhonePin, signUpWithPhonePin, type BizPlusRole } from "@/lib/auth";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
+/**
+ * AuthPage Component.
+ * Unified Login and Sign Up screen bridging custom phone+PIN behavior with Supabase auth APIs.
+ * Includes a fail-safe fallback for instances where the Supabase keys are not mapped correctly.
+ */
 export default function AuthPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -64,6 +69,7 @@ export default function AuthPage() {
     );
   }
 
+  // Triggers either signin or signup using custom phone+PIN wrappers.
   const onSubmit = async () => {
     if (!canSubmit) return;
     setLoading(true);

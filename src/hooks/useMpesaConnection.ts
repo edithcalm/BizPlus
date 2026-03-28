@@ -16,6 +16,11 @@ import { toast } from '@/hooks/use-toast';
 const STORAGE_KEY = 'bizplus_mpesa_credentials';
 const TRANSACTIONS_KEY = 'bizplus_mpesa_transactions';
 
+/**
+ * Primary state hook for managing the localized M-Pesa integration.
+ * Responsible for retaining credentials and transaction arrays locally using `localStorage`.
+ * Uses ref-based polling to simulate real-time API webhook connections for UI demonstrations.
+ */
 export function useMpesaConnection() {
   const [credentials, setCredentials] = useState<MpesaCredentials | null>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -59,22 +64,26 @@ export function useMpesaConnection() {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
   }, [transactions]);
 
-  // Connect to M-Pesa with optional Pochi la Biashara
+  /** 
+   * Connects the app to an M-Pesa Account (Till, Paybill, or Pochi).
+   * Validates and saves credentials to local storage, fetching demo/real data upon success.
+   */
   const connect = useCallback(async (
-    tillOrPaybill: string,
-    type: 'till' | 'paybill',
+    identifier: string,
+    type: 'till' | 'paybill' | 'pochi',
     businessName: string,
     pochiPhoneNumber?: string
   ) => {
     setIsConnecting(true);
     try {
-      const creds = await connectMpesaAccount(tillOrPaybill, type, businessName, pochiPhoneNumber);
+      const creds = await connectMpesaAccount(identifier, type, businessName, pochiPhoneNumber);
       setCredentials(creds);
       
-      const pochiMessage = pochiPhoneNumber ? ` + Pochi la Biashara (${pochiPhoneNumber})` : '';
+      const typeLabel = type === 'paybill' ? 'Paybill' : type === 'pochi' ? 'Pochi la Biashara' : 'Till';
+      const pochiMessage = type !== 'pochi' && pochiPhoneNumber ? ` + Pochi la Biashara (${pochiPhoneNumber})` : '';
       toast({
         title: "M-Pesa Connected! 🎉",
-        description: `Successfully linked ${type === 'till' ? 'Till' : 'Paybill'} ${tillOrPaybill}${pochiMessage}`,
+        description: `Successfully linked ${typeLabel} ${identifier}${pochiMessage}`,
       });
 
       // Load demo transactions if using the demo phone number
@@ -156,7 +165,10 @@ export function useMpesaConnection() {
     await fetchTransactionsInternal(activeCredentials);
   }, [credentials]);
 
-  // Simulate real-time incoming transactions
+  /**
+   * Evaluates dummy endpoints periodically to simulate and announce real-time incoming 
+   * transactions in the UI as 'Toasts'.
+   */
   const checkForNewTransactions = useCallback(() => {
     if (!credentials?.isConnected) return;
 
@@ -198,7 +210,11 @@ export function useMpesaConnection() {
     return newTransaction;
   }, []);
 
-  // Calculate daily summary with Pochi breakdown
+  /**
+   * Calculates a daily summary report (total vs expected vs actual cash)
+   * used across the dashboard and reconciliation views. Needs to be heavily optimized
+   * if migrating to large arrays, but perfectly fine for typical lightweight store sizes.
+   */
   const getDailySummary = useCallback((): DailySummary => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

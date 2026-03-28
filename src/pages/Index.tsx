@@ -6,9 +6,15 @@ import { MessagesView } from '@/views/MessagesView';
 import { CreditsView } from '@/views/CreditsView';
 import { ReportsView } from '@/views/ReportsView';
 
+/**
+ * The Index Page component. 
+ * Serves as the primary authenticated layout wrapping the Header, Bottom Navigation, 
+ * and conditionally rendering the view based on the current active tab.
+ */
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
 
+  // Renders the specific sub-view associated with the active navigation tab
   const renderView = () => {
     switch (activeTab) {
       case 'home':
