@@ -142,7 +142,7 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 - **Edith Karanja –  Full‑Stack Developer**  
   - Responsibilities: overall architecture, core features, integrations, coordination.
 
-- **Sheila Chesire – Mobile Developer / Frontend Engineer**  
+- **Sheila Chesire – Frontend Engineer**  
   - Responsibilities: UI implementation, navigation, state management, UX.
 
 - **Wendy Atieno – Backend Developer / DevOps**  
