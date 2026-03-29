@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="BizPlus social preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F766E" />
+      <stop offset="100%" stop-color="#115E59" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1030" cy="120" r="180" fill="#ffffff" opacity="0.08" />
+  <circle cx="1080" cy="520" r="220" fill="#ffffff" opacity="0.08" />
+  <text x="90" y="265" fill="#ffffff" font-size="92" font-family="Inter, Segoe UI, Arial, sans-serif" font-weight="700">
+    BizPlus
+  </text>
+  <text x="90" y="340" fill="#E6FFFA" font-size="40" font-family="Inter, Segoe UI, Arial, sans-serif" font-weight="500">
+    Smart bookkeeping and profit tracking
+  </text>
+  <text x="90" y="392" fill="#E6FFFA" font-size="40" font-family="Inter, Segoe UI, Arial, sans-serif" font-weight="500">
+    for your business.
+  </text>
+</svg>
