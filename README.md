@@ -65,7 +65,7 @@ BizPlus provides:
 
 ### Web Live Demo
 
-- **App URL**: [BizPlus Web App](https://mybizplus.vercel.app)
+- **App URL**: [BizPlus Web App](https://bizplus-ashy.vercel.app)
 
 - **Test Login – Owner**
   - Email/Phone: `0798111222`
@@ -139,14 +139,14 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 
 
 
+- **Wendy Atieno – Backend Developer / DevOps**  
+  - Responsibilities: API design, database, deployment, M‑Pesa integration.
+
 - **Edith Karanja –  Full‑Stack Developer**  
   - Responsibilities: overall architecture, core features, integrations, coordination.
 
-- **Sheila Chesire – Frontend Engineer**  
+-  **Sheila Chesire – Frontend Engineer**  
   - Responsibilities: UI implementation, navigation, state management, UX.
-
-- **Wendy Atieno – Backend Developer / DevOps**  
-  - Responsibilities: API design, database, deployment, M‑Pesa integration.
 
 - **Wesley Njenga – Product / UX / Research**  
   - Responsibilities: user research, flows, testing with SMEs, documentation.
@@ -172,7 +172,7 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 ```bash
 # Clone the repository
 git clone https://github.com/edithcalm/BizPlus.git
-cd bizplus
+cd BizPlus
 
 # Install dependencies (example for a JavaScript/TypeScript project)
 npm install
