@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Users, AlertTriangle, Search } from 'lucide-react';
 import { CreditCard } from '@/components/credits/CreditCard';
 import { ReminderModal } from '@/components/modals/ReminderModal';
+import { AddCreditModal } from '@/components/modals/AddCreditModal';
 import { Button } from '@/components/ui/button';
 import { CreditEntry } from '@/types/bizplus';
 import { formatCurrency } from '@/lib/formatters';
@@ -37,6 +38,7 @@ export function CreditsView() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'overdue'>('all');
   const [selectedCredit, setSelectedCredit] = useState<CreditEntry | null>(null);
   const [showReminder, setShowReminder] = useState(false);
+  const [showAddCredit, setShowAddCredit] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const now = new Date();
@@ -82,6 +84,23 @@ export function CreditsView() {
   const handlePayment = (credit: CreditEntry) => {
     // TODO: Implement payment recording modal
     console.log('Record payment for:', credit.customerName);
+  };
+
+  const handleAddCredit = (data: {
+    customerName: string;
+    amount: number;
+    description: string;
+    phoneNumber?: string;
+    dueDate?: Date;
+  }) => {
+    const newCredit: CreditEntry = {
+      id: crypto.randomUUID(),
+      ...data,
+      date: new Date(),
+      status: 'pending',
+      payments: [],
+    };
+    setCredits((prev) => [newCredit, ...prev]);
   };
 
   return (
@@ -178,6 +197,7 @@ export function CreditsView() {
         variant="fab"
         size="fab"
         className="fixed bottom-20 right-3 sm:right-4 z-40"
+        onClick={() => setShowAddCredit(true)}
       >
         <Plus className="h-6 w-6" />
       </Button>
@@ -186,6 +206,12 @@ export function CreditsView() {
         isOpen={showReminder}
         onClose={() => setShowReminder(false)}
         credit={selectedCredit}
+      />
+      
+      <AddCreditModal
+        isOpen={showAddCredit}
+        onClose={() => setShowAddCredit(false)}
+        onSubmit={handleAddCredit}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { X, MessageSquare, Copy, Check } from 'lucide-react';
+import { X, MessageSquare, Copy, Check, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { CreditEntry } from '@/types/bizplus';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -19,18 +19,17 @@ export function ReminderModal({ isOpen, onClose, credit }: ReminderModalProps) {
   const paidAmount = credit.payments.reduce((sum, p) => sum + p.amount, 0);
   const remainingAmount = credit.amount - paidAmount;
   
-  const reminderMessage = `Hello ${credit.customerName}! 👋
+  const isOverdue = credit.dueDate && new Date() > new Date(credit.dueDate);
+  
+  const reminderMessage = `Hello ${credit.customerName},
 
-This is a friendly reminder about your outstanding balance with us.
+${isOverdue 
+  ? `This is a reminder that your debt of KES ${formatCurrency(remainingAmount)} is OVERDUE. Please make the payment immediately.` 
+  : `This is a friendly reminder to settle your outstanding balance of KES ${formatCurrency(remainingAmount)} before the deadline.`}
 
-📋 Details:
-• Original amount: KES ${formatCurrency(credit.amount)}
-• Remaining balance: KES ${formatCurrency(remainingAmount)}
-${credit.dueDate ? `• Due date: ${formatDate(credit.dueDate)}` : ''}
+${credit.dueDate ? `Deadline: ${formatDate(credit.dueDate)}` : ''}
 
-Please settle at your earliest convenience. You can pay via M-Pesa or cash.
-
-Thank you for your business! 🙏`;
+Please pay via M-Pesa or cash. Thank you!`;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(reminderMessage);
@@ -39,9 +38,18 @@ Thank you for your business! 🙏`;
   };
 
   const handleWhatsApp = () => {
-    const phone = credit.phoneNumber?.replace(/^0/, '254');
+    if (!credit.phoneNumber) return;
+    const phone = credit.phoneNumber.replace(/^0/, '254');
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(reminderMessage)}`;
     window.open(url, '_blank');
+  };
+
+  const handleSMS = () => {
+    if (!credit.phoneNumber) return;
+    const phone = credit.phoneNumber;
+    // Using standard SMS URL scheme
+    const url = `sms:${phone}?body=${encodeURIComponent(reminderMessage)}`;
+    window.location.href = url;
   };
 
   return (
@@ -79,11 +87,31 @@ Thank you for your business! 🙏`;
         </div>
         
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3">
+          {credit.phoneNumber && (
+            <div className="flex gap-2 sm:gap-3">
+              <Button 
+                onClick={handleWhatsApp}
+                className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                WhatsApp
+              </Button>
+              <Button 
+                onClick={handleSMS}
+                className="flex-1"
+                variant="default"
+              >
+                <Smartphone className="h-4 w-4 mr-2" />
+                SMS
+              </Button>
+            </div>
+          )}
+          
           <Button 
             variant="outline"
             onClick={handleCopy}
-            className="flex-1"
+            className="w-full"
           >
             {copied ? (
               <>
@@ -97,16 +125,6 @@ Thank you for your business! 🙏`;
               </>
             )}
           </Button>
-          
-          {credit.phoneNumber && (
-            <Button 
-              onClick={handleWhatsApp}
-              className="flex-1"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              WhatsApp
-            </Button>
-          )}
         </div>
       </div>
     </div>

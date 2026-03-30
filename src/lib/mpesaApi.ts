@@ -11,7 +11,11 @@ import { Transaction, TransactionSource, PaymentMethod } from '@/types/bizplus';
 // Demo phone number for Pochi la Biashara
 export const DEMO_PHONE_NUMBER = '0721606409';
 
+export type MpesaConnectionType = 'till' | 'paybill' | 'pochi';
+
 export interface MpesaCredentials {
+  /** Primary channel the user connected with (Till, Paybill, or Pochi la Biashara). */
+  connectionType?: MpesaConnectionType;
   tillNumber?: string;
   paybillNumber?: string;
   pochiPhoneNumber?: string;
@@ -69,12 +73,209 @@ const generatePhoneNumber = (): string => {
   return prefix + suffix;
 };
 
-// Preloaded dummy transactions for demo (linked to 0721606409)
-export const getDemoTransactions = (): MpesaTransaction[] => {
+/** Resolves pipeline for API simulation (older stored creds may omit `connectionType`). */
+export function getConnectionPipeline(credentials: MpesaCredentials): MpesaConnectionType {
+  if (credentials.connectionType) return credentials.connectionType;
+  if (credentials.tillNumber) return 'till';
+  if (credentials.paybillNumber) return 'paybill';
+  return 'pochi';
+}
+
+const atDayOffset = (now: Date, daysAgo: number, hour: number, minute = 0) => {
+  const d = new Date(now);
+  d.setDate(now.getDate() - daysAgo);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+};
+
+/**
+ * Preloaded dummy transactions for demo — scoped to the connection type only
+ * (Till / Paybill / Pochi la Biashara), so each pipeline shows its own feed.
+ */
+export const getDemoTransactions = (
+  connectionType: MpesaConnectionType
+): MpesaTransaction[] => {
   const now = new Date();
-  
-  return [
-    // Pochi la Biashara transactions
+
+  const tillOnly: MpesaTransaction[] = [
+    {
+      transactionId: 'TILL001',
+      transactionCode: 'QJK2L5M8N9',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 1200,
+      phoneNumber: '0745678901',
+      partyName: 'Peter Kamau',
+      transactionDate: atDayOffset(now, 0, 12, 40),
+      balance: 15300,
+    },
+    {
+      transactionId: 'TILL002',
+      transactionCode: 'UJK5P8Q1R2',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 3500,
+      phoneNumber: '0756789012',
+      partyName: 'Jane Njeri',
+      transactionDate: atDayOffset(now, 0, 17, 5),
+      balance: 14100,
+    },
+    {
+      transactionId: 'TILL003',
+      transactionCode: 'YJK9T2U5V6',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 2200,
+      phoneNumber: '0778901234',
+      partyName: 'Grace Akinyi',
+      transactionDate: atDayOffset(now, 1, 14, 35),
+      balance: 5900,
+    },
+    {
+      transactionId: 'TILL004',
+      transactionCode: 'ZKL0U3V6W7',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 3100,
+      phoneNumber: '0790123456',
+      partyName: 'Mary Wanjiku',
+      transactionDate: atDayOffset(now, 2, 11, 15),
+      balance: 8100,
+    },
+    {
+      transactionId: 'TILL005',
+      transactionCode: 'DKL4Y7Z0A1',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 3900,
+      phoneNumber: '0722998877',
+      partyName: 'Faith Njoki',
+      transactionDate: atDayOffset(now, 3, 15, 10),
+      balance: 13650,
+    },
+    {
+      transactionId: 'TILL006',
+      transactionCode: 'FKL6A9B2C3',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 1800,
+      phoneNumber: '0733111222',
+      partyName: 'James Otieno',
+      transactionDate: atDayOffset(now, 4, 10, 20),
+      balance: 11850,
+    },
+    {
+      transactionId: 'TILL007',
+      transactionCode: 'GKL7B0C3D4',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 4200,
+      phoneNumber: '0744222333',
+      partyName: 'Elizabeth Chebet',
+      transactionDate: atDayOffset(now, 5, 13, 45),
+      balance: 16050,
+    },
+    {
+      transactionId: 'TILL008',
+      transactionCode: 'HKL8C1D4E5',
+      transactionType: 'BUYGOODS',
+      source: 'till',
+      amount: 2600,
+      phoneNumber: '0755333444',
+      partyName: 'Daniel Kimani',
+      transactionDate: atDayOffset(now, 6, 9, 30),
+      balance: 18650,
+    },
+  ];
+
+  const paybillOnly: MpesaTransaction[] = [
+    {
+      transactionId: 'PAYBILL001',
+      transactionCode: 'VJK6Q9R2S3',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 500,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'KPLC PREPAID',
+      accountReference: 'Electricity token',
+      transactionDate: atDayOffset(now, 0, 17, 10),
+      balance: 10600,
+    },
+    {
+      transactionId: 'PAYBILL002',
+      transactionCode: 'WJK7R0S3T4',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 900,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'Wholesale Supplier',
+      accountReference: 'Inventory restock',
+      transactionDate: atDayOffset(now, 1, 18, 20),
+      balance: 5000,
+    },
+    {
+      transactionId: 'PAYBILL003',
+      transactionCode: 'AKL1V4W7X8',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 600,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'Fuel Station',
+      accountReference: 'Delivery fuel',
+      transactionDate: atDayOffset(now, 2, 16, 30),
+      balance: 7500,
+    },
+    {
+      transactionId: 'PAYBILL004',
+      transactionCode: 'CKL3X6Y9Z0',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 450,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'NAIROBI WATER',
+      accountReference: 'Water bill',
+      transactionDate: atDayOffset(now, 3, 8, 45),
+      balance: 9750,
+    },
+    {
+      transactionId: 'PAYBILL005',
+      transactionCode: 'IKL9D2E5F6',
+      transactionType: 'RECEIVED',
+      source: 'paybill',
+      amount: 5200,
+      phoneNumber: '0722111000',
+      partyName: 'Corporate Client Ltd',
+      accountReference: 'Invoice 1042',
+      transactionDate: atDayOffset(now, 4, 11, 0),
+      balance: 14950,
+    },
+    {
+      transactionId: 'PAYBILL006',
+      transactionCode: 'JKL0E3F6G7',
+      transactionType: 'PAYBILL',
+      source: 'paybill',
+      amount: 1200,
+      phoneNumber: DEMO_PHONE_NUMBER,
+      partyName: 'Hardware Store',
+      accountReference: 'Stock purchase',
+      transactionDate: atDayOffset(now, 5, 14, 15),
+      balance: 13750,
+    },
+    {
+      transactionId: 'PAYBILL007',
+      transactionCode: 'KKL1F4G7H8',
+      transactionType: 'RECEIVED',
+      source: 'paybill',
+      amount: 3100,
+      phoneNumber: '0733888999',
+      partyName: 'Mary Wanjiku',
+      accountReference: 'Order ref MB12',
+      transactionDate: atDayOffset(now, 6, 10, 50),
+      balance: 16850,
+    },
+  ];
+
+  const pochiOnly: MpesaTransaction[] = [
     {
       transactionId: 'POCHI001',
       transactionCode: 'RJK2L5M8N9',
@@ -83,7 +284,7 @@ export const getDemoTransactions = (): MpesaTransaction[] => {
       amount: 2500,
       phoneNumber: '0712345678',
       partyName: 'John Mwangi',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 30), // 30 mins ago
+      transactionDate: atDayOffset(now, 0, 9, 15),
       balance: 18500,
     },
     {
@@ -95,7 +296,7 @@ export const getDemoTransactions = (): MpesaTransaction[] => {
       phoneNumber: '0723456789',
       partyName: 'Wholesale Supplier',
       accountReference: 'Stock purchase',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 2), // 2 hours ago
+      transactionDate: atDayOffset(now, 0, 15, 30),
       balance: 16000,
     },
     {
@@ -106,58 +307,9 @@ export const getDemoTransactions = (): MpesaTransaction[] => {
       amount: 1500,
       phoneNumber: '0734567890',
       partyName: 'Mary Wanjiku',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 4), // 4 hours ago
+      transactionDate: atDayOffset(now, 1, 11, 0),
       balance: 16800,
     },
-    // M-Pesa (Till) transactions
-    {
-      transactionId: 'TILL001',
-      transactionCode: 'QJK2L5M8N9',
-      transactionType: 'BUYGOODS',
-      source: 'till',
-      amount: 1200,
-      phoneNumber: '0745678901',
-      partyName: 'Peter Kamau',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60), // 1 hour ago
-      balance: 15300,
-    },
-    {
-      transactionId: 'TILL002',
-      transactionCode: 'UJK5P8Q1R2',
-      transactionType: 'BUYGOODS',
-      source: 'till',
-      amount: 3500,
-      phoneNumber: '0756789012',
-      partyName: 'Jane Njeri',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 3), // 3 hours ago
-      balance: 14100,
-    },
-    // M-Pesa (Paybill) expenses
-    {
-      transactionId: 'PAYBILL001',
-      transactionCode: 'VJK6Q9R2S3',
-      transactionType: 'PAYBILL',
-      source: 'paybill',
-      amount: 500,
-      phoneNumber: DEMO_PHONE_NUMBER,
-      partyName: 'KPLC PREPAID',
-      accountReference: 'Electricity token',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 45), // 45 mins ago
-      balance: 10600,
-    },
-    {
-      transactionId: 'PAYBILL002',
-      transactionCode: 'WJK7R0S3T4',
-      transactionType: 'PAYBILL',
-      source: 'paybill',
-      amount: 300,
-      phoneNumber: DEMO_PHONE_NUMBER,
-      partyName: 'NAIROBI WATER',
-      accountReference: 'Water bill',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 5), // 5 hours ago
-      balance: 10100,
-    },
-    // Yesterday's transactions
     {
       transactionId: 'POCHI004',
       transactionCode: 'XJK8S1T4U5',
@@ -166,21 +318,65 @@ export const getDemoTransactions = (): MpesaTransaction[] => {
       amount: 4500,
       phoneNumber: '0767890123',
       partyName: 'David Ochieng',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 24), // Yesterday
+      transactionDate: atDayOffset(now, 2, 10, 5),
       balance: 10400,
     },
     {
-      transactionId: 'TILL003',
-      transactionCode: 'YJK9T2U5V6',
-      transactionType: 'BUYGOODS',
-      source: 'till',
-      amount: 2200,
-      phoneNumber: '0778901234',
-      partyName: 'Grace Akinyi',
-      transactionDate: new Date(now.getTime() - 1000 * 60 * 60 * 26), // Yesterday
-      balance: 5900,
+      transactionId: 'POCHI005',
+      transactionCode: 'BKL2W5X8Y9',
+      transactionType: 'POCHI_RECEIVED',
+      source: 'pochi',
+      amount: 2700,
+      phoneNumber: '0711223344',
+      partyName: 'Samuel Kiprop',
+      transactionDate: atDayOffset(now, 3, 13, 0),
+      balance: 10200,
+    },
+    {
+      transactionId: 'POCHI006',
+      transactionCode: 'EKL5Z8A1B2',
+      transactionType: 'POCHI_SENT',
+      source: 'pochi',
+      amount: 700,
+      phoneNumber: '0744556677',
+      partyName: 'Transport Services',
+      accountReference: 'Delivery charges',
+      transactionDate: atDayOffset(now, 4, 17, 5),
+      balance: 12950,
+    },
+    {
+      transactionId: 'POCHI007',
+      transactionCode: 'LKL2G5H8I9',
+      transactionType: 'POCHI_RECEIVED',
+      source: 'pochi',
+      amount: 3300,
+      phoneNumber: '0755666777',
+      partyName: 'Ann Nyambura',
+      transactionDate: atDayOffset(now, 5, 12, 25),
+      balance: 16250,
+    },
+    {
+      transactionId: 'POCHI008',
+      transactionCode: 'MKL3H6I9J0',
+      transactionType: 'POCHI_SENT',
+      source: 'pochi',
+      amount: 550,
+      phoneNumber: '0766777888',
+      partyName: 'Safaricom',
+      accountReference: 'Airtime float',
+      transactionDate: atDayOffset(now, 6, 8, 40),
+      balance: 15700,
     },
   ];
+
+  switch (connectionType) {
+    case 'till':
+      return tillOnly;
+    case 'paybill':
+      return paybillOnly;
+    case 'pochi':
+      return pochiOnly;
+  }
 };
 
 /**
@@ -201,27 +397,24 @@ export const fetchMpesaTransactions = async (
   const transactions: MpesaTransaction[] = [];
   let balance = 15000 + Math.random() * 20000;
 
+  const pipeline = getConnectionPipeline(credentials);
+
   for (let i = 0; i < count; i++) {
-    // Determine transaction source randomly
-    const sourceRandom = Math.random();
     let source: TransactionSource;
     let transactionType: MpesaTransaction['transactionType'];
     let isReceived: boolean;
 
-    if (credentials.hasPochi && sourceRandom < 0.4) {
-      // 40% Pochi la Biashara if enabled
+    if (pipeline === 'pochi') {
       source = 'pochi';
-      isReceived = Math.random() > 0.25;
+      isReceived = Math.random() > 0.3;
       transactionType = isReceived ? 'POCHI_RECEIVED' : 'POCHI_SENT';
-    } else if (sourceRandom < 0.7) {
-      // 30% Till/Buy Goods
+    } else if (pipeline === 'till') {
       source = 'till';
-      isReceived = true; // Till transactions are always income
+      isReceived = true;
       transactionType = 'BUYGOODS';
     } else {
-      // 30% Paybill (usually expenses)
       source = 'paybill';
-      isReceived = Math.random() > 0.7; // 30% receive, 70% send
+      isReceived = Math.random() > 0.65;
       transactionType = isReceived ? 'RECEIVED' : 'PAYBILL';
     }
 
@@ -291,23 +484,22 @@ export const simulateIncomingTransaction = (credentials: MpesaCredentials): Mpes
   // 30% chance of generating a transaction
   if (Math.random() > 0.3) return null;
 
-  // Determine source
-  const sourceRandom = Math.random();
+  const pipeline = getConnectionPipeline(credentials);
   let source: TransactionSource;
   let transactionType: MpesaTransaction['transactionType'];
   let isReceived: boolean;
 
-  if (credentials.hasPochi && sourceRandom < 0.4) {
+  if (pipeline === 'pochi') {
     source = 'pochi';
-    isReceived = Math.random() > 0.2;
+    isReceived = Math.random() > 0.25;
     transactionType = isReceived ? 'POCHI_RECEIVED' : 'POCHI_SENT';
-  } else if (sourceRandom < 0.7) {
+  } else if (pipeline === 'till') {
     source = 'till';
     isReceived = true;
     transactionType = 'BUYGOODS';
   } else {
     source = 'paybill';
-    isReceived = Math.random() > 0.6;
+    isReceived = Math.random() > 0.55;
     transactionType = isReceived ? 'RECEIVED' : 'PAYBILL';
   }
 
@@ -371,13 +563,14 @@ export const connectMpesaAccount = async (
   }
 
   return {
+    connectionType: type,
     tillNumber: type === 'till' ? identifier : undefined,
     paybillNumber: type === 'paybill' ? identifier : undefined,
     pochiPhoneNumber: phoneToUse || undefined,
     businessName,
     isConnected: true,
     connectedAt: new Date(),
-    hasPochi: !!pochiPhoneNumber,
+    hasPochi: type === 'pochi' || !!pochiPhoneNumber,
   };
 };
 

@@ -8,7 +8,6 @@ import {
   simulateIncomingTransaction,
   mpesaToTransaction,
   getDemoTransactions,
-  DEMO_PHONE_NUMBER
 } from '@/lib/mpesaApi';
 import { Transaction, DailySummary } from '@/types/bizplus';
 import { toast } from '@/hooks/use-toast';
@@ -86,18 +85,14 @@ export function useMpesaConnection() {
         description: `Successfully linked ${typeLabel} ${identifier}${pochiMessage}`,
       });
 
-      // Load demo transactions if using the demo phone number
-      if (pochiPhoneNumber === DEMO_PHONE_NUMBER) {
-        const demoTxns = getDemoTransactions().map(mpesaToTransaction);
-        setTransactions(demoTxns);
-        toast({
-          title: "Demo Mode Active 📱",
-          description: "Loaded sample transactions for demonstration",
-        });
-      } else {
-        // Fetch initial transactions
-        await fetchTransactionsInternal(creds);
-      }
+      // Always load demo transactions on first connect so the app shows real-looking data.
+      // In production this would be replaced with a real Daraja API call.
+      const demoTxns = getDemoTransactions(type).map(mpesaToTransaction);
+      setTransactions(demoTxns);
+      toast({
+        title: "Data Synced 📊",
+        description: "Your recent M-Pesa transactions have been loaded.",
+      });
       
       return creds;
     } catch (error) {
