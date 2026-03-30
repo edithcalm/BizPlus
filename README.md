@@ -142,12 +142,11 @@ Typical users include kiosk owners, small retail shops, boda boda operators, mam
 ## 6. Collaborators & Roles
 
 
+- **Edith Karanja –  Full‑Stack Developer**  
+  - Responsibilities: overall architecture, core features, integrations, coordination.
 
 - **Wendy Atieno – Backend Developer / DevOps**  
   - Responsibilities: API design, database, deployment, M‑Pesa integration.
-
-- **Edith Karanja –  Full‑Stack Developer**  
-  - Responsibilities: overall architecture, core features, integrations, coordination.
 
 - **Sheila Chesire – Frontend Engineer**  
   - Responsibilities: UI implementation, navigation, state management, UX.
