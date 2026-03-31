@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Users, BarChart3 } from 'lucide-react';
+import { Home, MessageSquare, Users, BarChart3, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -11,6 +11,7 @@ const navItems: NavItem[] = [
   { icon: Home, label: 'Home', id: 'home' },
   { icon: MessageSquare, label: 'Messages', id: 'messages' },
   { icon: Users, label: 'Credits', id: 'credits' },
+  { icon: Wallet, label: 'Payments', id: 'payments' },
   { icon: BarChart3, label: 'Reports', id: 'reports' },
 ];
 

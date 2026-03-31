@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/api": "http://localhost:5000",
+    },
   },
   plugins: [react()],
   resolve: {
@@ -18,3 +21,4 @@ export default defineConfig(({ mode }) => ({
     },
   },
 }));
+

@@ -4,6 +4,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { HomeView } from '@/views/HomeView';
 import { MessagesView } from '@/views/MessagesView';
 import { CreditsView } from '@/views/CreditsView';
+import { PaymentsView } from '@/views/PaymentsView';
 import { ReportsView } from '@/views/ReportsView';
 
 /**
@@ -23,6 +24,8 @@ const Index = () => {
         return <MessagesView />;
       case 'credits':
         return <CreditsView />;
+      case 'payments':
+        return <PaymentsView />;
       case 'reports':
         return <ReportsView />;
       default:
