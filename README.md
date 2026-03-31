@@ -65,7 +65,7 @@ BizPlus provides:
 
 ### Web Live Demo
 
-- **App URL**: [BizPlus Web App](https://biz-plus-nu.vercel.app)
+- **App URL**: [BizPlus Web App](https://mbizplus.vercel.app)
 
 - **Test Login – Owner**
   - Email/Phone: `0798111222`
