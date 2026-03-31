@@ -97,3 +97,35 @@ export async function initiateB2CPayment({ phone, amount, remarks }) {
   return data;
 }
 
+export async function initiateB2BPayment({
+  businessNumber,
+  amount,
+  remarks,
+  channel,
+}) {
+  const token = await getMpesaAccessToken();
+
+  const url = `${MPESA_BASE_URL}/mpesa/b2b/v1/paymentrequest`;
+
+  const payload = {
+    Initiator: MPESA_INITIATOR_NAME,
+    SecurityCredential: MPESA_SECURITY_CREDENTIAL,
+    CommandID: "BusinessPayBill", // generic business payment
+    SenderIdentifierType: 4, // shortcode
+    RecieverIdentifierType: 4,
+    Amount: Number(amount),
+    PartyA: MPESA_SHORTCODE,
+    PartyB: businessNumber,
+    Remarks: remarks || `BizPlus B2B (${channel})`,
+    QueueTimeOutURL: MPESA_B2C_CALLBACK_URL,
+    ResultURL: MPESA_B2C_CALLBACK_URL,
+    AccountReference: "BizPlus B2B",
+  };
+
+  const { data } = await axios.post(url, payload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return data;
+}
+
