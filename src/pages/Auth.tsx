@@ -137,7 +137,7 @@ export default function AuthPage() {
                   <Input
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Wendy Atieno"
+                    placeholder="e.g. John Doe"
                     autoComplete="name"
                   />
                 </div>
